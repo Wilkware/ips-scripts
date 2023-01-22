@@ -1,7 +1,7 @@
 <?php
 ################################################################################
 # Script:   System.Functions.ips.php
-# Version:  2.0.20220801
+# Version:  2.1.20230121
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Basisfunktionen für einfache Scripterstellung!
@@ -10,8 +10,12 @@
 #
 # 09.05.2019 - Initalversion (v1.0)
 # 01.08.2022 - CreateIdent hinzugefügt
+# 21.01.2023 - Definition der WWX-Konstante
 #
 ################################################################################
+
+// Globale Definition der Bibliothek
+define('WWX_FUNCTIONS', true);
 
 // Erzeugt aus dem übergebenen Namen ein IPS konformen IDENT
 // Ausserdem erlauben wir nur kleingeschriebene Idents.

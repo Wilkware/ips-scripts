@@ -39,6 +39,8 @@ $profile = [
 # or direct in the script (uncomment next line)!
 # require_once(IPS_GetKernelDir()."scripts".DIRECTORY_SEPARATOR.'System.Functions.ips.php');
 # You can download it from here https://github.com/wilkware/ips-scripts
+#
+defined('WWX_FUNCTIONS') || die('Global function library not available!');
 
 // INSTALLATION
 if ($_IPS['SENDER']=='Execute') {
