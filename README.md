@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
 [![Product](https://img.shields.io/badge/Symcon%20Version-6.0-blue.svg)](https://www.symcon.de/produkt/)
-[![Version](https://img.shields.io/badge/Skin%20Version-1.1.20230121-orange.svg)](https://github.com/Wilkware/ips-scripts)
+[![Version](https://img.shields.io/badge/Skin%20Version-1.2.20230125-orange.svg)](https://github.com/Wilkware/ips-scripts)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welche man für ein IP-Symcon System verwenden kann.
@@ -23,6 +23,10 @@ Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welch
 Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von Skripte](https://wilkware.de/2022/03/versionierung-skripte/)' näher beschrieben.
 
 ### 3. Versionshistorie
+
+v1.2.20230125
+
+* _NEU_: Sonnengang Skript (Weather.Sunrun) hinzugefügt
 
 v1.1.20230121
 
