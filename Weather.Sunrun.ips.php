@@ -6,6 +6,9 @@
 #
 # Berechung des aktuellen Sonnenstandes und stellt ihn graphisch dar.
 #
+# Die Funktion CalcSunPos basiert auf der Arbeit von Adrian(@aglutz)
+# https://community.symcon.de/t/sonnenstand-berechnen-azimut-elevation/
+#
 # ------------------------------ Installation ----------------------------------
 #
 # Dieses Skript richtet automatisch alle nötigen Objekte bei manueller
