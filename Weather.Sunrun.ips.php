@@ -31,7 +31,7 @@
 $DEBUG  = false;
 #
 # Location Control ID (wenn 0 => müssen $LAT & $LON korrekt gesetzt werden)
-$LCID = 16504;
+$LCID = 0;
 # Latitude
 $LAT = '52.5208';
 # Longitude
