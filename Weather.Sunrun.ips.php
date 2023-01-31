@@ -1,7 +1,7 @@
 <?php
 ################################################################################
 # Script:  Weather.Sunrun.ips.php
-# Version: 2.1.20230127
+# Version: 2.2.20230130
 # Author:  Heiko Wilknitz (@Pitti)
 #
 # Berechung des aktuellen Sonnenstandes und stellt ihn graphisch dar.
@@ -26,7 +26,8 @@
 #
 # 27.22.2020 - Initialversion (v1.0)
 # 25.01.2023 - Umbau auf eigene Lösung (v2.0)
-# 25.01.2023 - Zeichenresourcen & Location dynamisiert
+# 25.01.2023 - Zeichenresourcen & Location dynamisiert (v2.1)
+# 30.01.2023 - Elevation Option hinzugefügt (v2.2)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -46,6 +47,7 @@ $DRAW = [
     'chart' => '/user/sunrun/chart.svg', // Chart- bzw Diagrambild
     'size' => 600, // Größe (Quadrad) des Containers (px)
     'line' => 4, // Linienstärke
+    'elevation' => true, // Draw Elevation
     'sunrise' => '#FC9C54', // Linienfarbe Sonnenaufgang
     'sunset' => '#FD5E53', // Linienfarbe Sonnenuntergang
     'sunpos' => '#FFE373', // Linienfarbe Sonnengang (akt. Position)
@@ -225,9 +227,15 @@ function BuildHtml($pos, $draw)
     $html .= 'var e_sp = ' . number_format($pos['sunpos']['elevation']) . ';';
     $html .= 'var c = document.getElementById("sunpos");';
     $html .= 'var ctx = c.getContext("2d");';
-    $html .= 'x1 = c.width/2;';
-    $html .= 'y1 = c.height/2;';
-    $html .= 'ln = c.height/2.6;';
+    $html .= 'var x1 = c.width/2;';
+    $html .= 'var y1 = c.height/2;';
+    $html .= 'var ln = c.height/2.6;';
+    if($draw['elevation']) { // elevation
+        $html .= 'if(e_sp < 0) e_sp = 0;';
+        $html .= 'var le = ln-((ln*e_sp)/90);';
+    } else {
+        $html .= 'var le = ln;';
+    }
     $html .= 'ctx.lineWidth = ' . $draw['line'] . ';';
     $html .= 'ctx.lineCap = "round";';
     // sunrise
@@ -247,8 +255,8 @@ function BuildHtml($pos, $draw)
     $html .= 'ctx.strokeStyle = "' . $draw['sunset']. '";';
     $html .= 'ctx.stroke();';
     // sunpos
-    $html .= 'x2 = x1 + (Math.cos((Math.PI * (a_sp-90)) / 180.0) * ln);';
-    $html .= 'y2 = y1 + (Math.sin((Math.PI * (a_sp-90)) / 180.0) * ln);';
+    $html .= 'x2 = x1 + (Math.cos((Math.PI * (a_sp-90)) / 180.0) * le);';
+    $html .= 'y2 = y1 + (Math.sin((Math.PI * (a_sp-90)) / 180.0) * le);';
     // Draw Line only if sun is visible
     if (($a_sp <= $a_ss) &&  ($a_sp >= $a_sr)) {
         $html .= 'ctx.beginPath();';
