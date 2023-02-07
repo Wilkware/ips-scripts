@@ -1,7 +1,7 @@
 <?php
 ################################################################################
 # Script:  Weather.Sunrun.ips.php
-# Version: 2.2.20230130
+# Version: 2.3.20230206
 # Author:  Heiko Wilknitz (@Pitti)
 #
 # Berechung des aktuellen Sonnenstandes und stellt ihn graphisch dar.
@@ -28,6 +28,7 @@
 # 25.01.2023 - Umbau auf eigene Lösung (v2.0)
 # 25.01.2023 - Zeichenresourcen & Location dynamisiert (v2.1)
 # 30.01.2023 - Elevation Option hinzugefügt (v2.2)
+# 06.02.2023 - Option für Sonnenuntergang hinzugefügt (v2.3)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -47,7 +48,10 @@ $DRAW = [
     'chart' => '/user/sunrun/chart.svg', // Chart- bzw Diagrambild
     'size' => 600, // Größe (Quadrad) des Containers (px)
     'line' => 4, // Linienstärke
-    'elevation' => true, // Draw Elevation
+    'elevation' => true, // Zeichne Elevation
+    'dashed' => true, // Zeichne gestrichelte Line nach Sonnenuntergang
+    'dashedline' => '[5,15]', // Muster gestrichelte Line
+    'dashedstroke' => '#F7f2E0', // Farbe gestrichelte Line
     'sunrise' => '#FC9C54', // Linienfarbe Sonnenaufgang
     'sunset' => '#FD5E53', // Linienfarbe Sonnenuntergang
     'sunpos' => '#FFE373', // Linienfarbe Sonnengang (akt. Position)
@@ -212,7 +216,7 @@ function BuildHtml($pos, $draw)
     $html .= '<html lang="de">';
     $html .= '<head>';
     $html .= '<style>';
-    $html .= '#sunmap {background: url("' . $draw['bg'] . '") no-repeat; background-size: cover; width: ' . $draw['size'] . 'px; height: ' . $draw['size'] . 'px;	}';
+    $html .= '#sunmap {background: url("' . $draw['bg'] . '") no-repeat; background-size: cover; width: ' . $draw['size'] . 'px; height: ' . $draw['size'] . 'px; margin: auto;}';
     $html .= 'canvas {background: url("' . $draw['chart'] .'") no-repeat center; background-size: 100% 100%;}';
     $html .= '</style>';
     $html .= '</head>';
@@ -257,7 +261,7 @@ function BuildHtml($pos, $draw)
     // sunpos
     $html .= 'x2 = x1 + (Math.cos((Math.PI * (a_sp-90)) / 180.0) * le);';
     $html .= 'y2 = y1 + (Math.sin((Math.PI * (a_sp-90)) / 180.0) * le);';
-    // Draw Line only if sun is visible
+    // Draw Line if sun is visible
     if (($a_sp <= $a_ss) &&  ($a_sp >= $a_sr)) {
         $html .= 'ctx.beginPath();';
         $html .= 'ctx.moveTo(x1, y1);';
@@ -265,7 +269,16 @@ function BuildHtml($pos, $draw)
         $html .= 'ctx.strokeStyle = "' . $draw['sunpos']. '";';
         $html .= 'ctx.stroke();';
     }
+    else if ($draw['dashed']) {
+        $html .= 'ctx.setLineDash(' . $draw['dashedline'] . ');';
+        $html .= 'ctx.beginPath();';
+        $html .= 'ctx.moveTo(x1, y1);';
+        $html .= 'ctx.lineTo(x2, y2);';
+        $html .= 'ctx.strokeStyle = "' . $draw['dashedstroke']. '";';
+        $html .= 'ctx.stroke();';
+    }
     // sun
+    $html .= 'ctx.setLineDash([]);';
     $html .= 'ctx.beginPath();';
     $html .= 'ctx.lineWidth = ' . $draw['sunline'] . ';';
     if (($a_sp <= $a_ss) &&  ($a_sp >= $a_sr)) {
