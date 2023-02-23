@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 ################################################################################
 # Script:   __autoload.php
 # Version:  1.0.20210609
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Um Funktionen, Konstanten usw. global über alle Skripte hinweg zur Verfügung
-# zu stellen müssen diese in der Datei "__autoload.php" definiert werden. 
+# zu stellen müssen diese in der Datei "__autoload.php" definiert werden.
 # Diese muss sich im "IP-Symcon/scripts"-Ordner befinden.
 #
 # Innerhalb der "__autoload.php" können dann weitere Dateien eingelesen werden.
@@ -16,4 +19,4 @@
 #
 ################################################################################
 
-require_once(IPS_GetKernelDir() . "/scripts/System.Functions.ips.php");
+require_once IPS_GetKernelDir() . '/scripts/System.Functions.ips.php';

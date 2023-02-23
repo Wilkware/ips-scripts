@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 ################################################################################
 # Script:   System.QuickChart.ips.php
 # Version:  1.1.20230223
@@ -36,8 +39,6 @@
 # 23.02.2023 - Fix ratio parameter (v1.1)
 #
 ################################################################################
-
-declare(strict_types=1);
 
 /**
  * A PHP client for the quickchart.io chart image API.
@@ -210,14 +211,14 @@ class QuickChart
             throw new Exception('Short URLs must use quickchart.io host');
         }
         $ch = curl_init($this->getRootEndpoint() . '/chart/create');
-        $postData = array(
-          'backgroundColor' => $this->background,
-          'width' => $this->width,
-          'height' => $this->height,
-          'devicePixelRatio' => number_format($this->ratio, 1),
-          'format' => $this->format,
-          'chart' => $this->getConfig(),
-        );
+        $postData = [
+            'backgroundColor'  => $this->background,
+            'width'            => $this->width,
+            'height'           => $this->height,
+            'devicePixelRatio' => number_format($this->ratio, 1),
+            'format'           => $this->format,
+            'chart'            => $this->getConfig(),
+        ];
         if ($this->api) {
             $postData['key'] = $this->api;
         }
@@ -225,7 +226,7 @@ class QuickChart
             $postData['version'] = $this->version;
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
 
@@ -247,14 +248,14 @@ class QuickChart
     public function toBinary(): string
     {
         $ch = curl_init($this->getRootEndpoint() . '/chart');
-        $postData = array(
-          'backgroundColor' => $this->background,
-          'width' => $this->width,
-          'height' => $this->height,
-          'devicePixelRatio' => number_format($this->ratio, 1),
-          'format' => $this->format,
-          'chart' => $this->getConfig(),
-        );
+        $postData = [
+            'backgroundColor'  => $this->background,
+            'width'            => $this->width,
+            'height'           => $this->height,
+            'devicePixelRatio' => number_format($this->ratio, 1),
+            'format'           => $this->format,
+            'chart'            => $this->getConfig(),
+        ];
         if (!empty($this->api)) {
             $postData['key'] = $this->api;
         }
@@ -262,7 +263,7 @@ class QuickChart
             $postData['version'] = $this->version;
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         if ($result === false) {

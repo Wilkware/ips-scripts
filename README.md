@@ -28,6 +28,7 @@ v1.3.20230223
 
 * _NEU_: QuickChart Skript (System.QuickChart) hinzugefügt
 * _NEU_: VSC Workspace Datei hinzugefügt
+* _NEU_: PHP CS Fixer (style) hinzugefügt
 
 v1.2.20230125
 

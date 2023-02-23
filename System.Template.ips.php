@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 ################################################################################
 # Script:   <category>.<name>.ips.php
 # Version:  1.0.yyyymmdd
@@ -14,7 +17,7 @@
 #
 # - Neues Skript erstellen
 # - Diesen PHP-Code hineinkopieren
-# - Abschnitt 'Konfiguration' den eigenen Gegebenheiten anpassen 
+# - Abschnitt 'Konfiguration' den eigenen Gegebenheiten anpassen
 # - Skript Abspeichern
 # - Skript Ausführen
 # - Visualisierung per Link auf entstandene Variablen erstellen
@@ -26,7 +29,7 @@
 # ------------------------------ Konfiguration ---------------------------------
 #
 # Global Debug Output Flag
-$DEBUG  = true;
+$DEBUG = true;
 #
 # Profiles
 $profile = [
@@ -43,8 +46,8 @@ $profile = [
 defined('WWX_FUNCTIONS') || die('Global function library not available!');
 
 // INSTALLATION
-if ($_IPS['SENDER']=='Execute') {
-    // CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null) 
+if ($_IPS['SENDER'] == 'Execute') {
+    // CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
     // $vid = CreateVariableByName($_IPS['SELF'], "Variable 1", 3, 0, '', '~HTMLBox');
     // $vpn = 'PROFIL.name';
     // CreateProfileInteger($vpn, 'Speedo', '', '', 1, 3, 0, 0, $profile);
@@ -58,25 +61,25 @@ if ($_IPS['SENDER']=='Execute') {
     // CreateCategoryByName($_IPS['SELF'], 'Test');
 }
 // WEBFRONT
-else if($_IPS['SENDER'] == 'WebFront') {
+elseif ($_IPS['SENDER'] == 'WebFront') {
     // Benutzer hat etwas geändert!
 }
 // VARIABLENAENDERUNG
-else if($_IPS['SENDER'] == 'Variable') {
+elseif ($_IPS['SENDER'] == 'Variable') {
     // ToDO?
 }
 // TIMER EVENT
-else if($_IPS['SENDER'] == "TimerEvent") {
+elseif ($_IPS['SENDER'] == 'TimerEvent') {
     $eid = 0; // CreateEventByName || CreateTimerByName
-    if($eid == $_IPS['EVENT']) {
+    if ($eid == $_IPS['EVENT']) {
         // Spezial Event/Timer?
     } else {
         // ScriptTimer
     }
 }
 // AUFRUF WEBHOOK
-else if($_IPS['SENDER'] == 'WebHook') {
-	// ToDo
+elseif ($_IPS['SENDER'] == 'WebHook') {
+    // ToDo
 }
 
 #----------------------------------- Functions ---------------------------------
@@ -84,4 +87,3 @@ else if($_IPS['SENDER'] == 'WebHook') {
 // Declare script specific functions here!
 
 ################################################################################
-?>
