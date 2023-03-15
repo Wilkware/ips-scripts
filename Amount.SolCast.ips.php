@@ -38,7 +38,7 @@ $DEBUG = false;
 #   rid:         Ressource ID der Anlage in Solcast
 #   graph:       Wenn true wird via quickchart.io ein Graph erstellt
 #
-# Erste Anlage
+# Erste Anlage (meine ist auf der Garage, bitte den Namen auch anpassen)
 $PVA['Garage'] = [
     'token'     => __WWX['SCC_TOKEN'], // (string) erstezen durch => '<API-KEY>'
     'rid'       => __WWX['SCC_RID'],   // (string) erstezen durch => '<GUID>'
@@ -65,6 +65,13 @@ require_once IPS_GetKernelDir() . 'scripts' . DIRECTORY_SEPARATOR . 'System.Quic
 
 // INSTALLATION
 if ($_IPS['SENDER'] == 'Execute') {
+    // Event 1 mal am Tag
+    $midnight = mktime(0, 4, 16);
+    CreateEventByName($_IPS['SELF'], 'UpdateMidnight', $midnight);
+    // Event aller 6 Stunde von  03:00 bis 22:00 Uhr
+    $from = mktime(2, 54, 16);
+    $to = mktime(22, 0, 0);
+    CreateEventByNameFromTo($_IPS['SELF'], 'UpdateDaily', 3, 1, $from, $to);
     foreach ($PVA as $name => $plant) {
         // Kategorie erzeugen
         $cid = CreateCategoryByName($_IPS['SELF'], $name);
@@ -73,8 +80,14 @@ if ($_IPS['SENDER'] == 'Execute') {
         $vid = CreateVariableByName($cid, 'Tabellarischer Verlauf', 3, 1, 'Database', '~HTMLBox');
         $vid = CreateVariableByName($cid, 'Graphischer Verlauf', 3, 2, 'Graph', '~HTMLBox');
         $vid = CreateVariableByName($cid, 'PV heute (normal)', 2, 10, '', '~Electricity');
+        // Archivierung aktivieren (Typ: Zähler)
+        RegisterArchive($vid, false);
         $vid = CreateVariableByName($cid, 'PV heute (besser)', 2, 11, '', '~Electricity');
+        // Archivierung aktivieren (Typ: Zähler)
+        RegisterArchive($vid, false);
         $vid = CreateVariableByName($cid, 'PV heute (schlechter)', 2, 12, '', '~Electricity');
+        // Archivierung aktivieren (Typ: Zähler)
+        RegisterArchive($vid, false);
         $vid = CreateVariableByName($cid, 'PV morgen (normal)', 2, 20, '', '~Electricity');
         $vid = CreateVariableByName($cid, 'PV morgen (besser)', 2, 21, '', '~Electricity');
         $vid = CreateVariableByName($cid, 'PV morgen (schlechter)', 2, 22, '', '~Electricity');
