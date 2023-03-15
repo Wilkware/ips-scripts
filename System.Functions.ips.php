@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   System.Functions.ips.php
-# Version:  2.1.20230121
+# Version:  3.0.20230315
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Basisfunktionen für einfache Scripterstellung!
@@ -12,30 +12,82 @@ declare(strict_types=1);
 # ------------------------------ Changelog -------------------------------------
 #
 # 09.05.2019 - Initalversion (v1.0)
-# 01.08.2022 - CreateIdent hinzugefügt
-# 21.01.2023 - Definition der WWX-Konstante
+# 01.08.2022 - CreateIdent hinzugefügt (v2.0)
+# 21.01.2023 - Definition der WWX-Konstante (v2.1)
+# 15.03.2023 - RegisterArchive, UnregisterArchive, UnregisterProfil,
+#              ExtractGuid, CreateEventByNameFromTo
+#              CreateIdent um Option erweitert
+#              CreateProfilInteger korrigiert (ACHTUNG)
+#              Dokumentation umgestellt (v3.0)
 #
 ################################################################################
 
 // Globale Definition der Bibliothek
 define('WWX_FUNCTIONS', true);
 
-// Erzeugt aus dem übergebenen Namen ein IPS konformen IDENT
-// Ausserdem erlauben wir nur kleingeschriebene Idents.
-function CreateIdent($name)
+/**
+ * Liefert die GUID für den übergebene Modul bzw. Aktion
+ *
+ * @param string $name Name des IPS Moduls oder Automation
+ *
+ * @return string GUID, e.g. '{43192F0B-135B-4CE7-A0A7-1475603F3060}'
+ */
+function ExtractGuid($name)
+{
+    // Modules
+    $guids = IPS_GetModuleList();
+    $result = false;
+    foreach ($guids as $guid) {
+        $module = IPS_GetModule($guid);
+        if ($module['ModuleName'] == $name) {
+            return $guid;
+        }
+    }
+    // Actions/Automations
+    $actions = json_decode(IPS_GetActions(), true);
+    $matching = [];
+    foreach ($actions as $action) {
+        if ($action['caption'] == $name && count($action['form']) == 0) {
+            $matching[] = $action;
+        }
+    }
+    if (count($matching) == 1) {
+        return $matching[0]['id'];
+    }
+    throw new Exception('GUID does not exist for ' . $name);
+}
+
+/**
+ * Erzeugt aus dem übergebenen Namen ein IPS konformen IDENT
+ *
+ * @param string $name Name für den Variablen-Ident
+ * @param bool $lower Wenn true, dann nur nur kleingeschriebene Idents.
+ *
+ * @return string Ident
+ */
+function CreateIdent($name, $lower = false)
 {
     $umlaute = ['/ä/', '/ö/', '/ü/', '/Ä/', '/Ö/', '/Ü/', '/ß/'];
     $replace = ['ae', 'oe', 'ue', 'Ae', 'Oe', 'Ue', 'ss'];
     $ident = preg_replace($umlaute, $replace, $name);
     // idents immer klein?!?
-    //$ident = strtolower($ident);
+    if ($lower) {
+        $ident = strtolower($ident);
+    }
     return preg_replace('/[^a-z0-9_]+/i', '', $ident);
 }
 
-// Erzeugt eine Kategorie unterhalb {id} mit dem Namen {name}
-// Existiert die Kategorie schon wird diese zurückgeliefert.
-// Position: 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
-// Icon: Zuweisung eines Icons mit dem Namen {icon}
+/**
+ * Erzeugt eine Kategorie unterhalb {id} mit dem Namen {name}
+ * Existiert die Kategorie schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem die Kategorie erzeugt werden soll.
+ * @param string $name Name der zu erzeugenden Kategorie
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ *
+ * @return int ID der bestehenden oder neu angelegten Kategorie
+ */
 function CreateCategoryByName($id, $name, $pos = 0, $icon = '')
 {
     $cid = @IPS_GetCategoryIDByName($name, $id);
@@ -49,25 +101,40 @@ function CreateCategoryByName($id, $name, $pos = 0, $icon = '')
     return $cid;
 }
 
-// Erzeugt ein Dummy Modul unterhalb {id} mit dem Namen {name}
-// Existiert das Modul schon wird diese zurückgeliefert.
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
+/**
+ * Erzeugt ein Dummy Modul unterhalb {id} mit dem Namen {name}
+ * Existiert das Modul schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem das Dummy Modulserzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Dummy Moduls
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ *
+ * @return int ID des bestehenden oder neu angelegten Dummy Moduls
+ */
 function CreateDummyByName($id, $name, $pos = 0, $icon = '')
 {
     return CreateDummyByIdent($id, $name, $name, $pos, $icon);
 }
 
-// Erzeugt ein Dummy Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
-// Existiert das Modul schon wird diese zurückgeliefert.
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
+/**
+ * Erzeugt ein Dummy Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
+ * Existiert das Modul schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem das Dummy Moduls erzeugt werden soll.
+ * @param string $ident Ident des zu erzeugenden Dummy Moduls
+ * @param string $name Name des zu erzeugenden Dummy Moduls
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ *
+ * @return int ID des bestehenden oder neu angelegten Dummy Moduls
+ */
 function CreateDummyByIdent($id, $ident, $name, $pos = 0, $icon = '')
 {
     $ident = CreateIdent($ident);
     $did = @IPS_GetObjectIDByIdent($ident, $id);
     if (!$did) {
-        $did = IPS_CreateInstance('{485D0419-BE97-4548-AA9C-C083EB82E61E}');
+        $did = IPS_CreateInstance(ExtractGuid('Dummy Module'));
         IPS_SetName($did, $name);
         IPS_SetIdent($did, $ident);
         IPS_SetParent($did, $id);
@@ -77,25 +144,40 @@ function CreateDummyByIdent($id, $ident, $name, $pos = 0, $icon = '')
     return $did;
 }
 
-// Erzeugt ein Popup Modul unterhalb {id} mit dem Namen {name}
-// Existiert das Modul schon wird diese zurückgeliefert.
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
+/**
+ * Erzeugt ein Popup Modul unterhalb {id} mit dem Namen {name}
+ * Existiert das Modul schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem das Popup Moduls erzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Popup Moduls
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ *
+ * @return int ID des bestehenden oder neu angelegten Popup Moduls
+ */
 function CreatePopupByName($id, $name, $pos = 0, $icon = '')
 {
     return CreatePopupByName($id, $name, $name, $pos, $icon);
 }
 
-// Erzeugt ein Popup Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
-// Existiert das Modul schon wird diese zurückgeliefert.
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
+/**
+ * Erzeugt ein Popup Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
+ * Existiert das Modul schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem das Popup Moduls erzeugt werden soll.
+ * @param string $ident Ident des zu erzeugenden Popup Moduls
+ * @param string $name Name des zu erzeugenden Popup Moduls
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ *
+ * @return int ID des bestehenden oder neu angelegten Popup Moduls
+ */
 function CreatePopupByIdent($id, $ident, $name, $pos = 0, $icon = '')
 {
     $ident = CreateIdent($ident);
     $pid = @IPS_GetObjectIDByIdent($ident, $id);
     if (!$pid) {
-        $pid = IPS_CreateInstance('{5EA439B8-FB5C-4B81-AA35-1D14F4EA9821}');
+        $pid = IPS_CreateInstance(ExtractGuid('Popup Module'));
         IPS_SetName($pid, $name);
         IPS_SetIdent($pid, $ident);
         IPS_SetParent($pid, $id);
@@ -105,13 +187,20 @@ function CreatePopupByIdent($id, $ident, $name, $pos = 0, $icon = '')
     return $pid;
 }
 
-// Erzeugt eine Variable unterhalb {id} mit dem Namen {name} vom Typ {type}
-// Existiert die Variable schon wird diese zurückgeliefert.
-// {type}   : 0 = Boolean, 1 = Integer, 2 = Float, 3 = String
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
-// {profil} : leer für kein Profil, sonst Profilnamen
-// {action} : Script-ID für Auslösung via Webfront
+/**
+ * Erzeugt eine Variable unterhalb {id} mit dem Namen {name} vom Typ {type}
+ * Existiert die Variable schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem die Variable erzeugt werden soll.
+ * @param string $name Name der zu erzeugenden Variable
+ * @param int $type Typ der Variable (0 = Boolean, 1 = Integer, 2 = Float, 3 = String)
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ * @param string $profil Leer für kein Profil, sonst Profilnamen
+ * @param int $action ID der benutzerdefinierten Aktion (Auslösung via Webfront)
+ *
+ * @return int ID der bestehenden oder neu angelegten Variable
+ */
 function CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
 {
     $vid = @IPS_GetVariableIDByName($name, $id);
@@ -131,13 +220,21 @@ function CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile 
     return $vid;
 }
 
-// Erzeugt eine Variable unterhalb {id} mit dem Namen {name} vom Typ {type}
-// Existiert die Variable schon wird diese zurückgeliefert.
-// {type}   : 0 = Boolean, 1 = Integer, 2 = Float, 3 = String
-// {pos}    : 0 gleich Standardposition, sonst neue Sortierreihenfolgenummer
-// [icon}   : Zuweisung eines Icons mit dem Namen {icon}
-// {profil} : leer für kein Profil, sonst Profilnamen
-// {action} : Script-ID für Auslösung via Webfront
+/**
+ * Erzeugt eine Variable unterhalb {id} mit dem Namen {name} vom Typ {type}
+ * Existiert die Variable schon wird diese zurückgeliefert.
+ *
+ * @param int $id ID unter welchem die Variable erzeugt werden soll.
+ * @param string $ident Ident der zu erzeugenden Variable
+ * @param string $name Name der zu erzeugenden Variable
+ * @param int $type Typ der Variable (0 = Boolean, 1 = Integer, 2 = Float, 3 = String)
+ * @param int $pos 0 gleich Standard, sonst neue Sortierreihenfolgenummer {pos}
+ * @param string $icon Zuweisung eines Icons mit dem übergebenen Namen
+ * @param string $profil Leer für kein Profil, sonst Profilnamen
+ * @param int $action ID der benutzerdefinierten Aktion (Auslösung via Webfront)
+ *
+ * @return int ID der bestehenden oder neu angelegten Variable
+ */
 function CreateVariableByIdent($id, $ident, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
 {
     $ident = CreateIdent($ident);
@@ -159,9 +256,17 @@ function CreateVariableByIdent($id, $ident, $name, $type, $pos = 0, $icon = '', 
     return $vid;
 }
 
-// Erzeugt einen Timer unterhalb {id} mit dem Namen {name} um Zeit {time}
-// Existiert das  Event schon wird diese zurückgeliefert.
-// $time = mktime(hour, minute, second);
+/**
+ * Erzeugt ein Event unterhalb {id} mit dem Namen {name} um Zeit {time}
+ * Existiert das Event schon wird diese zurückgeliefert.
+ * Hinweis: $time = mktime(hour, minute, second);
+ *
+ * @param int $id ID unter welchem das Event erzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Events
+ * @param int $time Uhrzeit an welchen das Event eintreten soll.
+ *
+ * @return int ID des bestehenden oder neu erzeugten Events
+ */
 function CreateEventByName($id, $name, $time = 0)
 {
     $eid = @IPS_GetEventIDByName($name, $id);
@@ -182,16 +287,62 @@ function CreateEventByName($id, $name, $time = 0)
         IPS_SetEventCyclicTimeTo($eid, 0, 0, 0);
         IPS_SetEventActive($eid, true);
         if (function_exists('IPS_SetEventAction')) {
-            IPS_SetEventAction($eid, '{7938A5A2-0981-5FE0-BE6C-8AA610D654EB}', []);
+            IPS_SetEventAction($eid, ExtractGuid('Run Automation'), []);
         }
     }
     return $eid;
 }
 
-// Erzeugt einen Timer unterhalb {id} mit dem Namen {name} um die Zeit {time}
-// Existiert das  Event schon wird diese zurückgeliefert.
-// Tägliche Ausführung: $time in Minuten
-// Einmalige Ausführung: $time mit mktime(hour, minute, second) übergeben.
+/**
+ * Erzeugt ein Event unterhalb {id} mit dem Namen {name} in der Zeit {from} bis {to}
+ * Existiert das  Event schon wird diese zurückgeliefert.
+ * Hinweis: $from/$to = mktime(hour, minute, second);
+ *
+ * @param int $id ID unter welchem das Event erzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Events
+ * @param int $type Zeittyp (1 Sekündlich,2 Minütlichm, 3 Stündlich)
+ * @param int $interval Zeitinterval (1 Alle X Sekunden, 2 Alle X Minuten, 3 Alle X Stunden)
+ * @param int $from Uhrzeit an welchen das Event starten soll.
+ * @param int $time Uhrzeit an welchen das Event stoppen soll.
+ *
+ * @return int ID des bestehenden oder neu erzeugten Events
+ */
+function CreateEventByNameFromTo($id, $name, $type, $interval, $from, $to)
+{
+    $eid = @IPS_GetEventIDByName($name, $id);
+    if (($eid === false) && ($type > 0) && ($interval > 0)) {
+        // Eventtyp = Zyklisch (1)
+        $eid = IPS_CreateEvent(1);
+        IPS_SetParent($eid, $id);
+        IPS_SetName($eid, $name);
+        IPS_SetPosition($eid, -2);
+        IPS_SetHidden($eid, true);
+    }
+    if ($from > 0 && $to > 0) {
+        // Datumstyp = Tägliche (2), Datumsintervall = keins (1), Datumstage = keine (0), Datumstagesintervall = keine (0), Zeittyp = Einmalig (0), Zeitintervall = keine (0)
+        IPS_SetEventCyclic($eid, 2, 1, 0, 0, $type, $interval);
+        IPS_SetEventCyclicTimeFrom($eid, (int) date('H', $from), (int) date('i', $from), (int) date('s', $from));
+        IPS_SetEventCyclicTimeTo($eid, (int) date('H', $to), (int) date('i', $to), (int) date('s', $to));
+        IPS_SetEventActive($eid, true);
+        if (function_exists('IPS_SetEventAction')) {
+            IPS_SetEventAction($eid, ExtractGuid('Run Automation'), []);
+        }
+    }
+    return $eid;
+}
+
+/**
+ * Erzeugt einen Timer unterhalb {id} mit dem Namen {name} um die Zeit {time}
+ * Existiert der Timer schon wird diese zurückgeliefert.
+ * Tägliche Ausführung: $time in Minuten
+ * Einmalige Ausführung: $time mit mktime(hour, minute, second) übergeben.
+ *
+ * @param int $id ID unter welchem das Timers erzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Timers
+ * @param int $time Uhrzeit bzw. Zeitpunkt des Timers.
+ *
+ * @return int ID des bestehenden oder neu erzeugten Timers
+ */
 function CreateTimerByName($id, $name, $time = 0, $repeat = true)
 {
     //IPS_LogMessage('TIMER', strftime("%Y-%m-%d", $time));
@@ -218,13 +369,20 @@ function CreateTimerByName($id, $name, $time = 0, $repeat = true)
         }
         IPS_SetEventActive($eid, true);
         if (function_exists('IPS_SetEventAction')) {
-            IPS_SetEventAction($eid, '{7938A5A2-0981-5FE0-BE6C-8AA610D654EB}', []);
+            IPS_SetEventAction($eid, ExtractGuid('Run Automation'), []);
         }
     }
     return $eid;
 }
 
-// Eine Funktion um ein Script im Script-Verzeichnis zu erzeugen
+/**
+ * Eine Funktion um ein Skript im Script-Verzeichnis zu erzeugen
+ *
+ * @param int $id ID unter welchem das Skript erzeugt werden soll.
+ * @param string $name Name des zu erzeugenden Scripts
+ *
+ * @return int ID des bestehenden oder neu erzeugten Scripts
+ */
 function CreateScriptByName($id, $name)
 {
     $sid = @IPS_GetScriptIDByName($name, $id);
@@ -236,10 +394,17 @@ function CreateScriptByName($id, $name)
     return $sid;
 }
 
-// Erzeugt ein WebHook
+/**
+ * Erzeugt ein WebHook mit Path {webhook} und Target {id}
+ *
+ * @param string $webhook Path des Ebhooks
+ * @param int $id Ziel ID (Target) des Webhooks
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function RegisterHook($webhook, $id)
 {
-    $ids = IPS_GetInstanceListByModuleID('{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}');
+    $ids = IPS_GetInstanceListByModuleID(ExtractGuid('WebHook Control'));
     if (count($ids) > 0) {
         $hooks = json_decode(IPS_GetProperty($ids[0], 'Hooks'), true);
         $found = false;
@@ -260,7 +425,77 @@ function RegisterHook($webhook, $id)
     }
 }
 
-// Erzeugt ein Variablenprofil vom Typ {type} mit Namen {name}
+/**
+ * Unregister a web hook.
+ *
+ * @param string $hook path of the web hook.
+ */
+function UnregisterHook($hook)
+{
+    $ids = IPS_GetInstanceListByModuleID(ExtractGuid('WebHook Control'));
+    if (count($ids) > 0) {
+        $hooks = json_decode(IPS_GetProperty($ids[0], 'Hooks'), true);
+        $found = false;
+        foreach ($hooks as $key => $value) {
+            if ($value['Hook'] == $hook) {
+                $found = true;
+                $this->SendDebug('UnregisterHook', $hook . $this->InstanceID);
+                break;
+            }
+        }
+        // Unregister
+        if ($found == true) {
+            array_splice($hooks, $key, 1);
+            IPS_SetProperty($ids[0], 'Hooks', json_encode($hooks));
+            IPS_ApplyChanges($ids[0]);
+        }
+    }
+}
+
+/**
+ * Aktiviert das Logging einer Variable im Archiv.
+ *
+ * @param int $id ID der zu loggenden Variable
+ * @param bool $default True für standard Aggregationstyp, sonst Zähler
+ * @param bool $zero true wenn Nullwerte ignoriert werden sollen.
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
+function RegisterArchive($id, $default = true, $zero = false)
+{
+    $ids = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'));
+    if (count($ids) > 0) {
+        AC_SetLoggingStatus($ids[0], $id, true);
+        AC_SetAggregationType($ids[0], $id, ($default ? 0 : 1));
+        if ($zero) {
+            AC_SetCounterIgnoreZeros($ids[0], $id, true);
+        }
+    }
+}
+
+/**
+ * Deaktiviert das Logging einer Variable im Archiv.
+ *
+ * @param int $id ID der nicht mehr zu loggenden Variable
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
+function UnregisterArchive($id)
+{
+    $ids = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'));
+    if (count($ids) > 0) {
+        AC_SetLoggingStatus($ids[0], $id, false);
+    }
+}
+
+/**
+ * Erzeugt ein Variablenprofil vom Typ {type} mit Namen {name}
+ *
+ * @param string $name Name des Profiles
+ * @param int $type Typ des Profils (0 = Boolean, 1 = Integer, 2 = Float, 3 = String)
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function CreateProfile($name, $type)
 {
     if (!IPS_VariableProfileExists($name)) {
@@ -273,7 +508,17 @@ function CreateProfile($name, $type)
     }
 }
 
-// Erzeugt ein Boolean-Variablenprofil (Boolean-Typ = 0)
+/**
+ * Erzeugt ein Boolean-Variablenprofil (Boolean-Typ = 0)
+ *
+ * @param string $name Name des Profiles
+ * @param string $icon Assoziertes Standard-Icon
+ * @param string $prefix Prefix Text
+ * @param string $suffix Suffix Text
+ * @param array $asso Array mit Profilassoziationen
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function CreateProfileBoolean($name, $icon, $prefix, $suffix, $asso)
 {
     CreateProfile($name, 0);
@@ -287,19 +532,25 @@ function CreateProfileBoolean($name, $icon, $prefix, $suffix, $asso)
     }
 }
 
-// Erzeugt ein Integer-Variablenprofil (Integer-Typ = 1)
-function CreateProfileInteger($name, $icon, $prefix, $suffix, $minvalue, $maxvalue, $step, $digits, $asso = null)
+/**
+ * Erzeugt ein Integer-Variablenprofil (Integer-Typ = 1)
+ *
+ * @param string $name Name des Profiles
+ * @param string $icon Assoziertes Standard-Icon
+ * @param string $prefix Prefix Text
+ * @param string $suffix Suffix Text
+ * @param int $minvalue Minimalwert welchen die Variable annehmen kann
+ * @param int $maxvalue Maximalwert welchen die Variable annehmen kann
+ * @param int $step Schrittweite in welchen sich der Wert erhöhen oder verringern kann
+ * @param array $asso Array mit Profilassoziationen
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
+function CreateProfileInteger($name, $icon, $prefix, $suffix, $minvalue, $maxvalue, $step, $asso = null)
 {
     CreateProfile($name, 1);
     IPS_SetVariableProfileIcon($name, $icon);
     IPS_SetVariableProfileText($name, $prefix, $suffix);
-    IPS_SetVariableProfileDigits($name, $digits);
-    /*
-        if (($asso !== null) && (count($asso) !== 0)) {
-            $minvalue = 0;
-            $maxvalue = 0;
-        }
-     */
     IPS_SetVariableProfileValues($name, $minvalue, $maxvalue, $step);
 
     if (($asso !== null) && (count($asso) !== 0)) {
@@ -309,7 +560,21 @@ function CreateProfileInteger($name, $icon, $prefix, $suffix, $minvalue, $maxval
     }
 }
 
-// Erzeugt ein Float-Variablenprofil (Float-Typ = 2)
+/**
+ * Erzeugt ein Float-Variablenprofil (Float-Typ = 2)
+ *
+ * @param string $name Name des Profiles
+ * @param string $icon Assoziertes Standard-Icon
+ * @param string $prefix Prefix Text
+ * @param string $suffix Suffix Text
+ * @param int $minvalue Minimalwert welchen die Variable annehmen kann
+ * @param int $maxvalue Maximalwert welchen die Variable annehmen kann
+ * @param int $step Schrittweite in welchen sich der Wert erhöhen oder verringern kann
+ * @param int $digits Anzahl Nachkommastellen die angezeigt werden sollen
+ * @param array $asso Array mit Profilassoziationen
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function CreateProfileFloat($name, $icon, $prefix, $suffix, $minvalue, $maxvalue, $step, $digits, $asso = null)
 {
     CreateProfile($name, 2);
@@ -330,7 +595,17 @@ function CreateProfileFloat($name, $icon, $prefix, $suffix, $minvalue, $maxvalue
     }
 }
 
-// Erzeugt ein String-Variablenprofil (String-Typ = 3)
+/**
+ * Erzeugt ein String-Variablenprofil (String-Typ = 3)
+ *
+ * @param string $name Name des Profiles
+ * @param string $icon Assoziertes Standard-Icon
+ * @param string $prefix Prefix Text
+ * @param string $suffix Suffix Text
+ * @param array $asso Array mit Profilassoziationen
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function CreateProfileString($name, $icon, $prefix, $suffix, $asso)
 {
     CreateProfile($name, 3);
@@ -344,7 +619,38 @@ function CreateProfileString($name, $icon, $prefix, $suffix, $asso)
     }
 }
 
-// Debug Ausgabe von Variablen, Felder & Objecten auf die Konsole
+/**
+ * Löscht ein Variablenprofile, sofern es nicht noch verwendet wird.
+ *
+ * @param string $name Name des Profiles
+ *
+ * @return void true im Erfolgsfall, anderenfalls false.
+ */
+function UnregisterProfile($name)
+{
+    if (!IPS_VariableProfileExists($name)) {
+        return false;
+    }
+    foreach (IPS_GetVariableList() as $vid) {
+        if (IPS_GetVariable($vid)['VariableCustomProfile'] == $name) {
+            return false;
+        }
+        if (IPS_GetVariable($vid)['VariableProfile'] == $name) {
+            return false;
+        }
+    }
+    return IPS_DeleteVariableProfile($name);
+}
+
+/**
+ * Debug Ausgabe von Variablen, Feldern & Objecten auf die Konsole
+ *
+ * @param string $msg Texthinweis zum Datenobjekt
+ * @param mixed $data Datenobjekt welches auszugeben ist
+ * @param string|null $pre Prefix, welcher den Datentyp näher beschreibt
+ *
+ * @return void Funktion liefert keinen Rückgabewert.
+ */
 function EchoDebug($msg, $data, $pre = null)
 {
     // Safty Check for use!

@@ -50,7 +50,7 @@ if ($_IPS['SENDER'] == 'Execute') {
     // CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
     // $vid = CreateVariableByName($_IPS['SELF'], "Variable 1", 3, 0, '', '~HTMLBox');
     // $vpn = 'PROFIL.name';
-    // CreateProfileInteger($vpn, 'Speedo', '', '', 1, 3, 0, 0, $profile);
+    // CreateProfileInteger($vpn, 'Speedo', '', '', 1, 3, 0, $profile);
     // z.B. Mitternachtsupdate
     // $midnight = mktime(0, 5, 0);
     // $eid = CreateEventByName($_IPS['SELF'], "Midnight Update", $midnight);
