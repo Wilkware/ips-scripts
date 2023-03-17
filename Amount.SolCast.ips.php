@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolCast.ips.php
-# Version:  1.1.20230212
+# Version:  1.2.20230217
 # Author:   Heiko Wilknitz (@Pitti)
 #           Idee von STELE99 (2022)
 #
@@ -26,7 +26,8 @@ declare(strict_types=1);
 # ------------------------------ Changelog -------------------------------------
 #
 # 22.02.2023 - Initalversion (v1.0)
-# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt
+# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt (v1.1)
+# 17.03.2023 - Fix für Archive Control (v1.2)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -134,12 +135,14 @@ function UpdateData($name, $plant, $reset = false)
     // Daten zurücksetzen oder zusammenführen
     if ($reset) {
         $data = $fore;
-        SetValue($hnid, 0);
-        SetValue($hbid, 0);
-        SetValue($hsid, 0);
-        SetValue($mnid, 0);
-        SetValue($mbid, 0);
-        SetValue($msid, 0);
+        // Heute Variablen
+        SetValueFloat($hnid, 0);
+        SetValueFloat($hbid, 0);
+        SetValueFloat($hsid, 0);
+        // Morgen Variablen
+        SetValueFloat($mnid, 0);
+        SetValueFloat($mbid, 0);
+        SetValueFloat($msid, 0);
     } else {
         foreach ($fore as $day => $hours) {
             foreach ($hours as $hour => $values) {
@@ -149,7 +152,7 @@ function UpdateData($name, $plant, $reset = false)
     }
     // Data wieder speichern
     $str = json_encode($data);
-    SetValue($did, $str);
+    SetValueString($did, $str);
     // Summen ermitteln für Heute (Archive) und Morgen
     $values = CalcTotal($data);
     // Heute
@@ -157,18 +160,18 @@ function UpdateData($name, $plant, $reset = false)
     ArchiveValue($hbid, $values[0]['more']);
     ArchiveValue($hsid, $values[0]['poor']);
     // Morgen
-    SetValue($mnid, $values[1]['norm']);
-    SetValue($mbid, $values[1]['more']);
-    SetValue($msid, $values[1]['poor']);
+    SetValueFloat($mnid, $values[1]['norm']);
+    SetValueFloat($mbid, $values[1]['more']);
+    SetValueFloat($msid, $values[1]['poor']);
     // HTML Table bauen
     $html = BuildTable($data);
     $vid = CreateVariableByName($cid, 'Tabellarischer Verlauf', 3);
-    SetValue($vid, $html);
+    SetValueString($vid, $html);
     // SVG Chart plotten
     $svg = DrawChart($data);
     $svg = str_replace(['1024pt', '325pt'], '100%', $svg);
     $vid = CreateVariableByName($cid, 'Graphischer Verlauf', 3);
-    SetValue($vid, $svg);
+    SetValueString($vid, $svg);
 }
 
 // Von SolCast gelieferten Daten auf Tages- und stundenbasis Normalisieren
@@ -198,14 +201,15 @@ function ForecastData($data)
 // Daten gezielt ins Archive schreiben (Zähler -> keine negativen Werte)
 function ArchiveValue($vid, $value)
 {
-    $lv = GetValue($vid);
+    $lv = GetValueFloat($vid);
     if ($lv < $value) {
-        SetValue($vid, $value);
+        SetValueFloat($vid, $value);
     } elseif ($lv > $value) {
         //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
-        $last = AC_GetLoggedValues(38732, $vid, 0, 0, 1)[0];
-        AC_DeleteVariableData(38732, $vid, $last['TimeStamp'], 0);
-        SetValue($vid, $value);
+        $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
+        $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
+        AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
+        SetValueFloat($vid, $value);
     }
 }
 
