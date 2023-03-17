@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolarForcast.ips.php
-# Version:  2.0.20230315
+# Version:  2.1.20230317
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Script zur Abholung und Aufbereitung der prognostizierten Solorproduktion
@@ -43,6 +43,7 @@ declare(strict_types=1);
 # 23.02.2023 - API Doc, Type fixes (v1.1)
 # 15.03.2023 - Umstellung bzw. Erweiterung für mehrere Anlagen
 #              und All-In-One Script (v2.0)
+# 17.03.2023 - Fix für Archive Control
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -126,11 +127,11 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
             $cid = CreateCategoryByName($_IPS['SELF'], $name);
             // Mitternacht - Reset auf 0
             $vid = CreateVariableByName($cid, 'Prognose Heute', 2);
-            SetValue($vid, 0);
+            SetValueFloat($vid, 0);
             $vid = CreateVariableByName($cid, 'Prognose Morgen', 2);
-            SetValue($vid, 0);
+            SetValueFloat($vid, 0);
             $vid = CreateVariableByName($cid, 'Aktuelle Stunde', 2);
-            SetValue($vid, 0);
+            SetValueFloat($vid, 0);
         }
     } elseif ($event == 'UpdateHourly') {
         foreach ($PVA as $name => $plant) {
@@ -141,34 +142,35 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
             // Save
             $vid = CreateVariableByName($cid, 'Daten', 3);
             $json = json_encode($data);
-            SetValue($vid, $json);
+            SetValueString($vid, $json);
             // aktuellen Werte abgleichen wenn notwendig
             $vid = CreateVariableByName($cid, 'Prognose Heute', 2);
-            $lv = GetValue($vid);
-            if ($lv < floatval($data['Heute'])) {
-                SetValue($vid, $data['Heute']);
-            } elseif ($lv > floatval($data['Heute'])) {
+            $lv = GetValueFloat($vid);
+            if ($lv < $data['Heute']) {
+                SetValueFloat($vid, $data['Heute']);
+            } elseif ($lv > $data['Heute']) {
                 //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
-                $last = AC_GetLoggedValues(ExtractGuid('Archive Control'), $vid, 0, 0, 1)[0];
-                AC_DeleteVariableData(ExtractGuid('Archive Control'), $vid, $last['TimeStamp'], 0);
-                SetValue($vid, $data['Heute']);
+                $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
+                $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
+                AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
+                SetValueFloat($vid, $data['Heute']);
             }
             unset($data['Heute']);
             $vid = CreateVariableByName($cid, 'Prognose Morgen', 2);
-            SetValue($vid, $data['Morgen']);
+            SetValueFloat($vid, $data['Morgen']);
             unset($data['Morgen']);
             $vid = CreateVariableByName($cid, 'Aktuelle Stunde', 2);
-            SetValue($vid, $data['Stunde']);
+            SetValueFloat($vid, $data['Stunde']);
             unset($data['Stunde']);
             // SVG Chart
             $svg = DrawChart($data);
             $svg = str_replace(['1024pt', '325pt'], '100%', $svg);
             $vid = CreateVariableByName($cid, 'Graphischer Verlauf', 3);
-            SetValue($vid, $svg);
+            SetValueString($vid, $svg);
             // HTML Table
             $html = BuildHtml($data);
             $vid = CreateVariableByName($cid, 'Tabellarischer Verlauf', 3);
-            SetValue($vid, $html);
+            SetValueString($vid, $html);
         }
     }
 }
