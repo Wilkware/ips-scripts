@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolCast.ips.php
-# Version:  1.2.20230217
+# Version:  1.1.20230212
 # Author:   Heiko Wilknitz (@Pitti)
 #           Idee von STELE99 (2022)
 #
@@ -26,8 +26,7 @@ declare(strict_types=1);
 # ------------------------------ Changelog -------------------------------------
 #
 # 22.02.2023 - Initalversion (v1.0)
-# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt (v1.1)
-# 17.03.2023 - Fix für Archive Control (v1.2)
+# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -77,7 +76,7 @@ if ($_IPS['SENDER'] == 'Execute') {
         // Kategorie erzeugen
         $cid = CreateCategoryByName($_IPS['SELF'], $name);
         $vid = CreateVariableByName($cid, 'Daten', 3, 0);
-        SetValue($vid, '[]');
+        SetValueString($vid, '[]');
         $vid = CreateVariableByName($cid, 'Tabellarischer Verlauf', 3, 1, 'Database', '~HTMLBox');
         $vid = CreateVariableByName($cid, 'Graphischer Verlauf', 3, 2, 'Graph', '~HTMLBox');
         $vid = CreateVariableByName($cid, 'PV heute (normal)', 2, 10, '', '~Electricity');
@@ -139,10 +138,12 @@ function UpdateData($name, $plant, $reset = false)
         SetValueFloat($hnid, 0);
         SetValueFloat($hbid, 0);
         SetValueFloat($hsid, 0);
+        IPS_Sleep(1000);
         // Morgen Variablen
         SetValueFloat($mnid, 0);
         SetValueFloat($mbid, 0);
         SetValueFloat($msid, 0);
+        IPS_Sleep(1000);
     } else {
         foreach ($fore as $day => $hours) {
             foreach ($hours as $hour => $values) {
@@ -210,6 +211,8 @@ function ArchiveValue($vid, $value)
         $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
         AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
         SetValueFloat($vid, $value);
+        IPS_Sleep(1000);
+        AC_ReAggregateVariable($aid, $vid);
     }
 }
 
