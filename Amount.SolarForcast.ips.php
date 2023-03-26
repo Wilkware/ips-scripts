@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolarForcast.ips.php
-# Version:  2.0.20230315
+# Version:  2.2.20230326
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Script zur Abholung und Aufbereitung der prognostizierten Solorproduktion
@@ -43,6 +43,8 @@ declare(strict_types=1);
 # 23.02.2023 - API Doc, Type fixes (v1.1)
 # 15.03.2023 - Umstellung bzw. Erweiterung für mehrere Anlagen
 #              und All-In-One Script (v2.0)
+# 17.03.2023 - Fix für Archive Control (v2.1)
+# 26.03.2023 - Fix Style & Logging (v2.2)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -136,7 +138,7 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
         foreach ($PVA as $name => $plant) {
             // Kategorie erzeugen oder lesen
             $cid = CreateCategoryByName($_IPS['SELF'], $name);
-            // von 05:00 bis 21:00 - TODO: Timer im Sommer vielleicht anpassen
+            // von 08:00 bis 18:00 - TODO: Timer im Sommer vielleicht anpassen
             $data = UpdateForecast($plant);
             // Save
             $vid = CreateVariableByName($cid, 'Daten', 3);
@@ -145,16 +147,13 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
             // aktuellen Werte abgleichen wenn notwendig
             $vid = CreateVariableByName($cid, 'Prognose Heute', 2);
             $lv = GetValueFloat($vid);
-            //IPS_LogMessage('SPD', 'Alt: ' . $lv . ' ,Neu: '. $data['Heute'] . ' (' . floatval($data['Heute']) . ')');
             if ($lv < $data['Heute']) {
                 SetValueFloat($vid, $data['Heute']);
-                //IPS_LogMessage('SPD', 'Add: ' . $data['Heute']);
             } elseif ($lv > $data['Heute']) {
                 //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
                 $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
                 $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
                 AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
-                //IPS_LogMessage('SPD', 'Last: ' . print_r($last,true));
                 SetValueFloat($vid, $data['Heute']);
                 IPS_Sleep(1000);
                 AC_ReAggregateVariable($aid, $vid);
