@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolCast.ips.php
-# Version:  1.1.20230212
+# Version:  1.2.20230317
 # Author:   Heiko Wilknitz (@Pitti)
 #           Idee von STELE99 (2022)
 #
@@ -26,7 +26,8 @@ declare(strict_types=1);
 # ------------------------------ Changelog -------------------------------------
 #
 # 22.02.2023 - Initalversion (v1.0)
-# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt
+# 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt (v1.1)
+# 17.03.2023 - Fix für Archive Control (v1.2)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
