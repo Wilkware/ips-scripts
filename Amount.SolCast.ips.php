@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolCast.ips.php
-# Version:  1.2.20230317
+# Version:  1.3.20230515
 # Author:   Heiko Wilknitz (@Pitti)
 #           Idee von STELE99 (2022)
 #
@@ -28,6 +28,7 @@ declare(strict_types=1);
 # 22.02.2023 - Initalversion (v1.0)
 # 12.03.2023 - BuildTable,CalcTotal & ArchiveValue hinzugefügt (v1.1)
 # 17.03.2023 - Fix für Archive Control (v1.2)
+# 15.05.2023 - Keine Zwischenwerte mehr im Archiv
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -204,16 +205,17 @@ function ForecastData($data)
 function ArchiveValue($vid, $value)
 {
     $lv = GetValueFloat($vid);
-    if ($lv < $value) {
-        SetValueFloat($vid, $value);
-    } elseif ($lv > $value) {
+    if (($lv > 0) && ($lv != $value)) {
         //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
         $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
         $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
         AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
-        SetValueFloat($vid, $value);
         IPS_Sleep(1000);
+        SetValueFloat($vid, $value);
         AC_ReAggregateVariable($aid, $vid);
+        IPS_Sleep(1000);
+    } else {
+        SetValueFloat($vid, $value);
     }
 }
 
