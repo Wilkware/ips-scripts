@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   System.Functions.ips.php
-# Version:  3.0.20230315
+# Version:  4.0.20231005
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Basisfunktionen für einfache Scripterstellung!
@@ -19,6 +19,11 @@ declare(strict_types=1);
 #              CreateIdent um Option erweitert
 #              CreateProfilInteger korrigiert (ACHTUNG)
 #              Dokumentation umgestellt (v3.0)
+# 05.10.2023 - GetObjectByIdent und GetObjectByName hinzugefügt
+#              GetCategoryByName, GetEventByName, GetScriptByName
+#              GetDummyByName, GetDummyByIdent
+#              GetPopupByName, GetPopupByIdent,
+#              GetVariableByName und GetVariableByName hinzugefügt  (v4.0)
 #
 ################################################################################
 
@@ -78,6 +83,36 @@ function CreateIdent($name, $lower = false)
 }
 
 /**
+ * Liefert die ID eines Objektes unterhalb {id} mit dem Ident {ident}.
+ *
+ * @param int $id ID unter welchem das Objekt gesucht werden soll.
+ * @param string $ident Ident des zu suchenden Objektes
+ * @param bool $internal Nutzung der internen Ident-Funktion
+ *
+ * @return int|false ID des gefundenen Objektes, andernfalls false.
+ */
+function GetObjectByIdent($id, $ident, $internal = true)
+{
+    if($internal) {
+        $ident = CreateIdent($ident);
+    }
+    return @IPS_GetObjectIDByIdent($ident, $id);
+}
+
+/**
+ * Liefert die ID eines Objektes unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem das Objekt gesucht werden soll.
+ * @param string $name Name des zu suchenden Objektes
+ *
+ * @return int|false ID des gefundenen Objektes, andernfalls false.
+ */
+function GetObjectByName($id, $name)
+{
+    return @IPS_GetObjectIDByName($name, $id);
+}
+
+/**
  * Erzeugt eine Kategorie unterhalb {id} mit dem Namen {name}
  * Existiert die Kategorie schon wird diese zurückgeliefert.
  *
@@ -90,8 +125,8 @@ function CreateIdent($name, $lower = false)
  */
 function CreateCategoryByName($id, $name, $pos = 0, $icon = '')
 {
-    $cid = @IPS_GetCategoryIDByName($name, $id);
-    if (!$cid) {
+    $cid = GetCategoryByName($id, $name);
+    if ($cid === false) {
         $cid = IPS_CreateCategory();
         IPS_SetName($cid, $name);
         IPS_SetParent($cid, $id);
@@ -99,6 +134,19 @@ function CreateCategoryByName($id, $name, $pos = 0, $icon = '')
         IPS_SetIcon($cid, $icon);
     }
     return $cid;
+}
+
+/**
+ * Liefert die ID eine Kategorie unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem die Kategorie erzeugt werden soll.
+ * @param string $name Name der zu erzeugenden Kategorie
+ *
+ * @return int|false ID der gefundenen Kategorie, andernfalls false.
+ */
+function GetCategoryByName($id, $name)
+{
+    return @IPS_GetCategoryIDByName($name, $id);
 }
 
 /**
@@ -118,6 +166,19 @@ function CreateDummyByName($id, $name, $pos = 0, $icon = '')
 }
 
 /**
+ * Liefert die ID eines Dummy Moduls unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem das Dummy Moduls erzeugt wurde.
+ * @param string $name Name des zu suchenden Dummy Moduls
+ *
+ * @return int|false ID des gefundenen Dummy Moduls, andernfalls false.
+ */
+function GetDummyByName($id, $name)
+{
+    return GetObjectByName($id, $name);
+}
+
+/**
  * Erzeugt ein Dummy Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
  * Existiert das Modul schon wird diese zurückgeliefert.
  *
@@ -132,8 +193,8 @@ function CreateDummyByName($id, $name, $pos = 0, $icon = '')
 function CreateDummyByIdent($id, $ident, $name, $pos = 0, $icon = '')
 {
     $ident = CreateIdent($ident);
-    $did = @IPS_GetObjectIDByIdent($ident, $id);
-    if (!$did) {
+    $did = GetObjectByIdent($id, $ident);
+    if ($did === false) {
         $did = IPS_CreateInstance(ExtractGuid('Dummy Module'));
         IPS_SetName($did, $name);
         IPS_SetIdent($did, $ident);
@@ -142,6 +203,19 @@ function CreateDummyByIdent($id, $ident, $name, $pos = 0, $icon = '')
         IPS_SetIcon($did, $icon);
     }
     return $did;
+}
+
+/**
+ * Liefert die ID eines Dummy Moduls unterhalb {id} mit dem Ident {ident}.
+ *
+ * @param int $id ID unter welchem das Dummy Moduls erzeugt wurde.
+ * @param string $ident Ident des zu suchenden Dummy Moduls
+ *
+ * @return int|false ID des gefundenen Dummy Moduls, andernfalls false.
+ */
+function GetDummyByIdent($id, $ident)
+{
+    return GetObjectByIdent($id, $ident);
 }
 
 /**
@@ -161,6 +235,19 @@ function CreatePopupByName($id, $name, $pos = 0, $icon = '')
 }
 
 /**
+ * Liefert die ID eines Popup Moduls unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem das Popup Modul erzeugt wurde.
+ * @param string $name Name des zu suchenden Popup Moduls
+ *
+ * @return int|false ID des gefundenen Popup Moduls, andernfalls false.
+ */
+function GetPopupByName($id, $name)
+{
+    return GetObjectByName($id, $name);
+}
+
+/**
  * Erzeugt ein Popup Modul unterhalb {id} mit dem Namen {name} und Ident {ident}
  * Existiert das Modul schon wird diese zurückgeliefert.
  *
@@ -175,8 +262,8 @@ function CreatePopupByName($id, $name, $pos = 0, $icon = '')
 function CreatePopupByIdent($id, $ident, $name, $pos = 0, $icon = '')
 {
     $ident = CreateIdent($ident);
-    $pid = @IPS_GetObjectIDByIdent($ident, $id);
-    if (!$pid) {
+    $pid = GetObjectByIdent($id, $ident);
+    if ($pid === false) {
         $pid = IPS_CreateInstance(ExtractGuid('Popup Module'));
         IPS_SetName($pid, $name);
         IPS_SetIdent($pid, $ident);
@@ -185,6 +272,19 @@ function CreatePopupByIdent($id, $ident, $name, $pos = 0, $icon = '')
         IPS_SetIcon($pid, $icon);
     }
     return $pid;
+}
+
+/**
+ * Liefert die ID eines Popup Moduls unterhalb {id} mit dem Ident {ident}.
+ *
+ * @param int $id ID unter welchem das Popup Modul erzeugt wurde.
+ * @param string $ident Ident des zu suchenden Popup Moduls
+ *
+ * @return int|false ID des gefundenen Popup Moduls, andernfalls false.
+ */
+function GetPopupByIdent($id, $ident)
+{
+    return GetObjectByIdent($id, $ident);
 }
 
 /**
@@ -203,7 +303,7 @@ function CreatePopupByIdent($id, $ident, $name, $pos = 0, $icon = '')
  */
 function CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
 {
-    $vid = @IPS_GetVariableIDByName($name, $id);
+    $vid = GetVariableByName($id, $name);
     if ($vid === false) {
         $vid = IPS_CreateVariable($type);
         IPS_SetParent($vid, $id);
@@ -218,6 +318,19 @@ function CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile 
         }
     }
     return $vid;
+}
+
+/**
+ * Liefert die ID einer Variable unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem die Variable erzeugt wurde.
+ * @param string $name Name der zu suchenden Variable
+ *
+ * @return int|false ID der gefundenen Variable, andernfalls false.
+ */
+function GetVariableByName($id, $name)
+{
+    return @IPS_GetVariableIDByName($name, $id);
 }
 
 /**
@@ -238,7 +351,7 @@ function CreateVariableByName($id, $name, $type, $pos = 0, $icon = '', $profile 
 function CreateVariableByIdent($id, $ident, $name, $type, $pos = 0, $icon = '', $profile = '', $action = null)
 {
     $ident = CreateIdent($ident);
-    $vid = @IPS_GetObjectIDByIdent($ident, $id);
+    $vid = GetObjectByIdent($id, $ident);
     if ($vid === false) {
         $vid = IPS_CreateVariable($type);
         IPS_SetParent($vid, $id);
@@ -257,6 +370,19 @@ function CreateVariableByIdent($id, $ident, $name, $type, $pos = 0, $icon = '', 
 }
 
 /**
+ * Liefert die ID einer Variable unterhalb {id} mit dem Ident {ident}.
+ *
+ * @param int $id ID unter welchem die Variable erzeugt wurde.
+ * @param string $ident Ident der zu suchenden Variable
+ *
+ * @return int|false ID der gefundenen Variable, andernfalls false.
+ */
+function GetVariableByIdent($id, $ident)
+{
+    return GetObjectByIdent($id, $ident);
+}
+
+/**
  * Erzeugt ein Event unterhalb {id} mit dem Namen {name} um Zeit {time}
  * Existiert das Event schon wird diese zurückgeliefert.
  * Hinweis: $time = mktime(hour, minute, second);
@@ -269,7 +395,7 @@ function CreateVariableByIdent($id, $ident, $name, $type, $pos = 0, $icon = '', 
  */
 function CreateEventByName($id, $name, $time = 0)
 {
-    $eid = @IPS_GetEventIDByName($name, $id);
+    $eid = GetEventByName($id, $name);
     if (($eid === false) && ($time > 0)) {
         // Eventtyp = Zyklisch (1)
         $eid = IPS_CreateEvent(1);
@@ -309,7 +435,7 @@ function CreateEventByName($id, $name, $time = 0)
  */
 function CreateEventByNameFromTo($id, $name, $type, $interval, $from, $to)
 {
-    $eid = @IPS_GetEventIDByName($name, $id);
+    $eid = GetEventByName($id, $name);
     if (($eid === false) && ($type > 0) && ($interval > 0)) {
         // Eventtyp = Zyklisch (1)
         $eid = IPS_CreateEvent(1);
@@ -345,8 +471,7 @@ function CreateEventByNameFromTo($id, $name, $type, $interval, $from, $to)
  */
 function CreateTimerByName($id, $name, $time = 0, $repeat = true)
 {
-    //IPS_LogMessage('TIMER', strftime("%Y-%m-%d", $time));
-    $eid = @IPS_GetEventIDByName($name, $id);
+    $eid = GetEventByName($id, $name);
     if (($eid === false) && ($time > 0)) {
         // Eventtyp = Zyklisch (1)
         $eid = IPS_CreateEvent(1);
@@ -376,6 +501,19 @@ function CreateTimerByName($id, $name, $time = 0, $repeat = true)
 }
 
 /**
+ * Liefert die ID eines Events bzw. Timers unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem das Event erzeugt wurde.
+ * @param string $name Name des zu suchenden Events oder Timers.
+ *
+ * @return int|false ID des gefundenen Events, andernfalls false.
+ */
+function GetEventByName($id, $name)
+{
+    return @IPS_GetEventIDByName($name, $id);
+}
+
+/**
  * Eine Funktion um ein Skript im Script-Verzeichnis zu erzeugen
  *
  * @param int $id ID unter welchem das Skript erzeugt werden soll.
@@ -385,13 +523,26 @@ function CreateTimerByName($id, $name, $time = 0, $repeat = true)
  */
 function CreateScriptByName($id, $name)
 {
-    $sid = @IPS_GetScriptIDByName($name, $id);
-    if ($sid == 0) {
+    $sid = GetScriptByName($id, $name);
+    if ($sid === false) {
         $sid = IPS_CreateScript(0);
         IPS_SetName($sid, $name);
         IPS_SetParent($sid, $id);
     }
     return $sid;
+}
+
+/**
+ * Liefert die ID eines Skriptes unterhalb {id} mit dem Namen {name}.
+ *
+ * @param int $id ID unter welchem das Skript erzeugt wurde.
+ * @param string $name Name des zu suchenden Skriptes.
+ *
+ * @return int|false ID des gefundenen Skriptes, andernfalls false.
+ */
+function GetScriptByName($id, $name)
+{
+    return @IPS_GetScriptIDByName($name, $id);
 }
 
 /**
