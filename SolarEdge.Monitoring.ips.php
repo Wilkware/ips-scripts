@@ -21,12 +21,12 @@ declare(strict_types=1);
 # ---------------------------- Konfiguration -----------------------------------
 #
 # Global Debug Output Flag
-$DEBUG  = false;
-#
-$API_KEY    = __WWX['SEM_TOKEN']; 
-$API_SITE   = __WWX['SEM_SID']; 
-$API_BASE   = 'https://monitoringapi.solaredge.com';
-$API_UNIT   = 'MONTH';
+$DEBUG = false;
+
+$API_KEY = __WWX['SEM_TOKEN'];
+$API_SITE = __WWX['SEM_SID'];
+$API_BASE = 'https://monitoringapi.solaredge.com';
+$API_UNIT = 'MONTH';
 #
 ################################################################################
 #
@@ -101,7 +101,7 @@ function UpdateOverview($api_base, $api_key, $site_id)
     $url = "$api_base/site/$site_id/overview?api_key=$api_key";
     EchoDebug(__FUNCTION__, $url);
     // Daten holen
-    $response = Sys_GetURLContent($url); 
+    $response = Sys_GetURLContent($url);
     if($response === false) {
         IPS_LogMessage('SolarEdge', 'Fehler bei Overview aufgetreten!');
         return;
@@ -147,7 +147,7 @@ function UpdateSiteEnergy($api_base, $api_key, $site_id, $time_unit)
     $url = "$api_base/site/$site_id/energyDetails?timeUnit=$time_unit&endTime=$date_end&startTime=$date_start&api_key=$api_key";
     EchoDebug(__FUNCTION__, $url);
     // Daten holen
-    $response = Sys_GetURLContent($url); 
+    $response = Sys_GetURLContent($url);
     if($response === false) {
         IPS_LogMessage('SolarEdge', 'Fehler bei SiteEnergy aufgetreten!');
         return;
@@ -198,39 +198,37 @@ function RenderHtml($data)
     .sem-box-chart{width:100%;display:flex;position:relative;}
     .sem-box-text{width:100%;display:flex;position:relative;font-size:0.9em;padding-top:5px;padding-bottom:15px;}
     .sem-box-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;z-index:10;}
-    .sem-selfconsumption_percent{width:'.$selfconsumption_percent.'%;background:#28cdab;padding-top:10px;padding-left:10px;padding-bottom:10px;color:white;border-radius:5px 0px 0px 5px;}
-    .sem-feedin-percent{width:' .$feedin_percent.'%;background:#15c603;padding-top:10px;padding-bottom:10px;padding-right:10px;direction:rtl;color:white;border-radius:0px 5px 5px 0px;}
-    .sem-selfproduction-percent{width:'.$selfproduction_percent.'%;background:#28cdab;padding-top:10px;padding-left:10px;padding-bottom:10px;color:white;border-radius:5px 0px 0px 5px;}
-    .sem-purchaesd-percent{width:'.$purchaesd_percent.'%;background:#d00000;padding-top:10px;padding-right:10px;padding-bottom:10px;white-space:nowrap;direction:rtl;color:white;border-radius:0px 5px 5px 0px;}
+    .sem-selfconsumption_percent{width:' . $selfconsumption_percent . '%;background:#28cdab;padding-top:10px;padding-left:10px;padding-bottom:10px;color:white;border-radius:5px 0px 0px 5px;}
+    .sem-feedin-percent{width:' . $feedin_percent . '%;background:#15c603;padding-top:10px;padding-bottom:10px;padding-right:10px;direction:rtl;color:white;border-radius:0px 5px 5px 0px;}
+    .sem-selfproduction-percent{width:' . $selfproduction_percent . '%;background:#28cdab;padding-top:10px;padding-left:10px;padding-bottom:10px;color:white;border-radius:5px 0px 0px 5px;}
+    .sem-purchaesd-percent{width:' . $purchaesd_percent . '%;background:#d00000;padding-top:10px;padding-right:10px;padding-bottom:10px;white-space:nowrap;direction:rtl;color:white;border-radius:0px 5px 5px 0px;}
     .sem-text-right{width:50%;text-align:right;}
     .sem-text-left{width:50%;}
 </style>
 </head>
 <body>
 <div class="sem-box-text">
-    <div class="sem-text-left">&#128197; '.$time_spent.'</div>
-    <div class="sem-text-right">&#9200; '.date('d.m.Y H:i', $now).' Uhr</div>
+    <div class="sem-text-left">&#128197; ' . $time_spent . '</div>
+    <div class="sem-text-right">&#9200; ' . date('d.m.Y H:i', $now) . ' Uhr</div>
 </div>
 <div class="sem-box-chart">
-    <div class="sem-box-overlay">Produktion: '.$production_kwh.' kWh</div>
-    <div class="sem-selfconsumption_percent">'.$selfconsumption_percent.'%</div>
-    <div class="sem-feedin-percent">'.$feedin_percent.'%</div>
+    <div class="sem-box-overlay">Produktion: ' . $production_kwh . ' kWh</div>
+    <div class="sem-selfconsumption_percent">' . $selfconsumption_percent . '%</div>
+    <div class="sem-feedin-percent">' . $feedin_percent . '%</div>
 </div>
 <div class="sem-box-text">
-    <div class="sem-text-left">Eigenverbrauch: <font style="color: #28cdab; font-weight: bold;">'.$selfconsumption_kwh.'&nbsp;kWh</font></div>
-    <div class="sem-text-right">Einspeisung: <font style="color: #15c603; font-weight: bold;">'.$feedin_kwh.'&nbsp;kWh</font></div>
+    <div class="sem-text-left">Eigenverbrauch: <font style="color: #28cdab; font-weight: bold;">' . $selfconsumption_kwh . '&nbsp;kWh</font></div>
+    <div class="sem-text-right">Einspeisung: <font style="color: #15c603; font-weight: bold;">' . $feedin_kwh . '&nbsp;kWh</font></div>
 </div>
 <div class="sem-box-chart">
-    <div class="sem-box-overlay">Verbrauch: '.$consumption_kwh.' kWh</div>
-    <div class="sem-selfproduction-percent">'.$selfproduction_percent.'%</div>
-    <div class="sem-purchaesd-percent">'.$purchaesd_percent.'%</div>
+    <div class="sem-box-overlay">Verbrauch: ' . $consumption_kwh . ' kWh</div>
+    <div class="sem-selfproduction-percent">' . $selfproduction_percent . '%</div>
+    <div class="sem-purchaesd-percent">' . $purchaesd_percent . '%</div>
 </div>
 <div class="sem-box-text">
-    <div class="sem-text-left">Eigenproduktion: <font style="color: #28cdab; font-weight: bold;">'.$selfproduction_kwh.'&nbsp;kWh</font></div>
-    <div class="sem-text-right">Zukauf: <font style="color: #FF0000; font-weight: bold;">'.$purchaesd_kwh.'&nbsp;kWh&nbsp;</font></div>
+    <div class="sem-text-left">Eigenproduktion: <font style="color: #28cdab; font-weight: bold;">' . $selfproduction_kwh . '&nbsp;kWh</font></div>
+    <div class="sem-text-right">Zukauf: <font style="color: #FF0000; font-weight: bold;">' . $purchaesd_kwh . '&nbsp;kWh&nbsp;</font></div>
 </div>';
 
     return $html;
 }
-
-?>
