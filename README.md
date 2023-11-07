@@ -26,7 +26,7 @@ Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von
 
 v1.9.20231107
 
-* _FIX_: Veraltete Fsystem-Calls im Meldungsskript
+* _FIX_: Veraltete System-Calls im Meldungsskript
 
 v1.8.20231106
 
