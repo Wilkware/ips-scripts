@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   System.Dashboard.ips.php
-# Version:  5.0.20230808
+# Version:  5.1.20231107
 # Author:   Heiko Wilknitz (@Pitti)
 #           Original von Horst (12.11.2010)
 #           Angepasst für RasPi lueralba (31.3.2015)
@@ -104,11 +104,12 @@ declare(strict_types=1);
 # 06.11.2020 - Notify um Sender erweitert um +/- zu ermöglichen (v4.3)
 # 20.06.2020 - Flag für extra Switch Page Button (v4.4)
 # 08.08.2023 - Tabelle für neue Kachel-Visu (v5.0)
+# 07.11.2023 - Fix für neue Systemfunktionen (v5.1)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
-# WebFront Configuration
-$wfc = 52523;
+# WebFront Configuration (ID)
+$wfc = 0;
 # First In First Out - erste Meldung wird zuerst dargestellt, sonst
 # letzte Meldung zuerst (LIFO).
 $fifo = false;
@@ -596,7 +597,11 @@ function RenderCard($data)
     $content = $style;
     $content .= '<div class="card">';
     $content .= '<table class="wwx">';
-
+    $content .= '<colgroup>';
+    $content .= '<col width=20em">';
+    $content .= '<col width=500em">';
+    $content .= '<col width=50em">';
+    $content .= '</colgroup>';
     if ($cnt == 0) {
         // Keine Meldung, dann sagen wir das auch ;-)
         if(!$nomsg) {
@@ -743,21 +748,21 @@ function Install()
     global $types;
     // Profil erzeugen
     $vpn = 'Message.Type';
-    CreateProfileInteger($vpn, 'Talk', '', '', 0, 0, 0, 0, $types);
+    CreateProfileInteger($vpn, 'Talk', '', '', 0, 0, 0, $types);
     // Variablen erzeugen
     $pos = 1;
-    $vid = CreateVariableByName($_IPS['SELF'], 'Daten', 3, '', $pos++);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Daten', 3, $pos++);
     IPS_SetHidden($vid, true);
-    $vid = CreateVariableByName($_IPS['SELF'], 'Nachrichten', 3, '', $pos++);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Nachrichten', 3, $pos++);
     IPS_SetHidden($vid, true);
     SetValueString($vid, json_encode([]));
-    $vid = CreateVariableByName($_IPS['SELF'], 'Aktivitäten', 3, '~HTMLBox', $pos++);
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungen', 3, '~HTMLBox', $pos++);
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, '', $pos++);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Aktivitäten', 3, $pos++, '', '~HTMLBox');
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungen', 3, $pos++, '', '~HTMLBox');
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);;
     SetValueInteger($vid, 0);
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungstyp', 1, $vpn, $pos++, $_IPS['SELF']);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungstyp', 1, $pos++, '', $vpn, $_IPS['SELF']);
     SetValueInteger($vid, -1);
-    $vid = CreateVariableByName($_IPS['SELF'], 'Texttafel', 3, '~TextBox', $pos++);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Texttafel', 3, $pos++, '', '~TextBox');
     $ids = IPS_GetChildrenIDs($_IPS['SELF']);
     foreach ($ids as $id) {
         if (IPS_EventExists($id) && substr(IPS_GetName($id), 0, 16) == 'Remove Message #') {
