@@ -590,7 +590,7 @@ function RenderCard($data)
     $style .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 5px; }';
     $style .= '.wwx tr { border-bottom: 1px solid ' . $tbc . '; }';
     $style .= '.wwx tr:nth-of-type(1) { border-top: 1px solid ' . $tbc . '; }';
-    $style .= '.icon {width: 24px; height: 24px;' . $iif .'}';
+    $style .= '.icon {width: 24px; height: 24px;' . $iif . '}';
     $style .= 'span { font-size: 0.9em; }';
     $style .= '.blue {background-color: #11A0F3; }';
     $style .= '.green {background-color: #58A906; }';
@@ -764,7 +764,7 @@ function Install()
     SetValueString($vid, json_encode([]));
     $vid = CreateVariableByName($_IPS['SELF'], 'Aktivitäten', 3, $pos++, '', '~HTMLBox');
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungen', 3, $pos++, '', '~HTMLBox');
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);;
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);
     SetValueInteger($vid, 0);
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungstyp', 1, $pos++, '', $vpn, $_IPS['SELF']);
     SetValueInteger($vid, -1);

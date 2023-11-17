@@ -78,7 +78,7 @@ $HTML = [
     'icon24'    => false,   // true = Nutzung eigener Icons für 24 Stunden Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'ibase'     => 'https://basmilius.github.io/weather-icons/production/line/all/', // URL Base für Online-Icons (.../fill/all/ or .../line/all/)
     'iext'      => '.svg',  // Image Type Extension (.png, .svg, .jpg, ...)
-    'theme'     => 'hell',  // 'hell' oder 'dunkel' 
+    'theme'     => 'hell',  // 'hell' oder 'dunkel'
 ];
 #
 # Globale Übersetzungstabelle
@@ -387,7 +387,7 @@ function SetDailyWeather($days)
         $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px ' . $bgc . '; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
         $htmlTV .= '.wfgd > .day {font-size: 6vh;}';
         $htmlTV .= '.wfgd > .img {width: 48px; height: 48px; margin: auto; display: block; }';
-        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc .'; border-radius:5px; margin: 0 4px}';
+        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc . '; border-radius:5px; margin: 0 4px}';
         $htmlTV .= '.wifo {position: absolute; top: 0; right: 0; display: grid; grid-template-rows: 1fr 1fr 1fr 1fr ; grid-template-columns: auto; margin: 0 auto; justify-content: center;}';
         $htmlTV .= '.wifo > .txt {font-size: 7vh; opacity: 75%;}';
         $htmlTV .= '.fall:before {content: ""; background: url("/preview/assets/icons/Umbrella.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
