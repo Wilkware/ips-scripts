@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   System.Dashboard.ips.php
-# Version:  5.1.20231107
+# Version:  5.2.20231116
 # Author:   Heiko Wilknitz (@Pitti)
 #           Original von Horst (12.11.2010)
 #           Angepasst für RasPi lueralba (31.3.2015)
@@ -105,6 +105,8 @@ declare(strict_types=1);
 # 20.06.2020 - Flag für extra Switch Page Button (v4.4)
 # 08.08.2023 - Tabelle für neue Kachel-Visu (v5.0)
 # 07.11.2023 - Fix für neue Systemfunktionen (v5.1)
+# 16.11.2023 - Fix für Icons mit hellem Themes (v5.2)
+#              Icons für TileVisu werden auch aus dessen Assets geladen
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
@@ -123,6 +125,8 @@ $bfort = false;
 # Flag, ob Button für Switch Page angezeigt werden soll;
 # nur in Kombi mit $bfort = false
 $bpage = true;
+# Flag, für hellen oder dunklem Theme in der TileVisu
+$light = false;
 # Profile Message Typen
 $types = [
     [-1, 'Alle', '', 0x808080],
@@ -568,9 +572,11 @@ function RenderMessages($data)
 // Meldungen als HTML Card zusammenbauen.
 function RenderCard($data)
 {
-    global $fifo, $nomsg, $noico, $bfort, $bpage;
+    global $fifo, $nomsg, $noico, $bfort, $bpage, $light;
     $mid = CreateVariableByName($_IPS['SELF'], 'Texttafel', 3);
     $cnt = count($data);
+    $iif = ($light) ? ' filter: invert(0.6);' : '';
+    $tbc = ($light) ? '#D7D6D6' : '#4A4B4D';
     // Etwas CSS und HTML
     $style = '<meta name="viewport" content="width=device-width, initial-scale=1">';
     $style .= '<style type="text/css">';
@@ -582,16 +588,16 @@ function RenderCard($data)
     $style .= '.card { display:block; }';
     $style .= 'table.wwx { border-collapse: collapse; width: 100% }';
     $style .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 5px; }';
-    $style .= '.wwx tr { border-bottom: 2px solid #4A4B4D; }';
-    $style .= '.wwx tr:nth-of-type(1) { border-top: 2px solid #4A4B4D; }';
-    $style .= '.icon {width: 24px; height: 24px; }';
+    $style .= '.wwx tr { border-bottom: 1px solid ' . $tbc . '; }';
+    $style .= '.wwx tr:nth-of-type(1) { border-top: 1px solid ' . $tbc . '; }';
+    $style .= '.icon {width: 24px; height: 24px;' . $iif .'}';
     $style .= 'span { font-size: 0.9em; }';
     $style .= '.blue {background-color: #11A0F3; }';
     $style .= '.green {background-color: #58A906; }';
     $style .= '.yellow {background-color: #FFC107; }';
     $style .= '.red {background-color: #F35A2C; }';
     $style .= '.orange {background-color: #FF9800; }';
-    $style .= '.button { cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; }';
+    $style .= '.button { color: white; cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; }';
     $style .= '</style>';
     // Sart Content
     $content = $style;
@@ -608,7 +614,7 @@ function RenderCard($data)
             $content = $content . '<tr>';
             // Icon?
             if(!$noico) {
-                $content = $content . '<td><img class="icon" src="/img/icons/Ok.svg"></img></td>';
+                $content = $content . '<td><img class="icon" src="/preview/assets/icons/Ok.svg"></img></td>';
             }
             // Button vor Text
             if($noico && $bfort) {
@@ -660,10 +666,10 @@ function RenderCard($data)
                 if (isset($message['timestamp'])) {
                     $title .= 'title="' . date('d.m.Y H:i', $message['timestamp']) . '" ';
                 }
-                $image = '<img class="icon" src="/img/icons/' . $message['image'] . '.svg"' . $title . '></img>';
+                $image = '<img class="icon" src="/preview/assets/icons/' . $message['image'] . '.svg"' . $title . '></img>';
             }
             else {
-                $image = '<img class="icon" src="/img/icons/Ok.svg"></img>';
+                $image = '<img class="icon" src="/preview/assets/icons/Ok.svg"></img>';
             }
             $content .= '<tr>';
             // Icon?

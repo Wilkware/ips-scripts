@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
 [![Product](https://img.shields.io/badge/Symcon%20Version-6.0-blue.svg)](https://www.symcon.de/produkt/)
-[![Version](https://img.shields.io/badge/Library%20Version-1.9.20231107-orange.svg)](https://github.com/Wilkware/ips-scripts)
+[![Version](https://img.shields.io/badge/Library%20Version-2.0.20231117-orange.svg)](https://github.com/Wilkware/ips-scripts)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welche man für ein IP-Symcon System verwenden kann.
@@ -23,6 +23,12 @@ Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welch
 Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von Skripte](https://wilkware.de/2022/03/versionierung-skripte/)' näher beschrieben.
 
 ### 3. Versionshistorie
+
+v2.0.20231117
+
+* _NEU_: Unterstützung der Themes für Tile Visu
+* _NEU_: Erweiterung für PirateWeather Skript um Vorhersage und Klimadaten
+* _FIX_: Icondarstellung im Dashboard Skript funktioniert jetzt korrekt
 
 v1.9.20231107
 

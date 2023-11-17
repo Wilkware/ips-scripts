@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Scriptbezeichnung: Weather.PirateWeather.ips.php
-# Version: 3.0.20231106
+# Version: 3.1.20231116
 # Author:  Heiko Wilknitz (@Pitti)
 #
 # Abruf von Wetterdaten via PirateWeather API!
@@ -34,7 +34,9 @@ declare(strict_types=1);
 #
 # 10.03.2019 - Initalversion (v1.0)
 # 24.03.2023 - Umstellung auf PirateWeather API (v2.0)
-# 06.11.2023 - Anpassung für Nutzung via Pitti's Skript-Bibliothek
+# 06.11.2023 - Anpassung für Nutzung via Pitti's Skript-Bibliothek (v3.0)
+# 16.11.2023 - Erweiterungen für Tile Visu (v3.1)
+#              Unterstützung von Themes, Vorhersage und einiges mehr
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
@@ -60,14 +62,23 @@ if ($LCID != 0) {
 #
 # Settings für HTML-Boxen;
 $HTML = [
-    'temp'      => 0,       // ID einer eigenen Temperaturvariable, z.B. von Wetterstation
+    'temp'      => 0,       // ID eigenen Temperaturvariable, z.B. von Wetterstation
+    'chance'    => 0,       // ID eigener Niederschlagswahrscheinlichkeit, z.B. von Wetterstation
+    'wind'      => 0,       // ID eigener Windgeschwindigkeit, z.B. von Wetterstation
+    'direction' => 0,       // ID eigener Windrichtung, z.B. von Wetterstation
+    'humidity'  => 0,       // ID eigener Luftfeutigkeit (Aussen), z.B. von Wetterstation
+    'rain'      => 0,       // ID eigener Niederschlagsmenge, z.B. von Wetterstation
     'sunrise'   => date_sunrise(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),  // Uhrzeit 'hh:mm' für Sonnenaufgang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'sunset'    => date_sunset(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),   // Uhrzeit 'hh:mm' für Sonnenuntergang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'webfront'  => true,    // true = Support für WebFront ('3-Tage-Wetter' & '24-Stunden--Wetter'), IPS <= v6.4
     'tilevisu'  => true,    // true = Support für Tile Visu ('Aktuelles-Wetter'). IPS >= v7.0
-    'icons'     => false,   // true = Nutzung eigener Icons (siehe Array $ICONS) oder nachfolgende URL hinterlegen
-    'ibase'     => 'https://basmilius.github.io/weather-icons/production/fill/all/', // URL Base für Online-Icons
+    'icon01'    => false,   // true = Nutzung eigener Icons für aktuelle Wetterlage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'icon03'    => false,   // true = Nutzung eigener Icons für 3 Tage Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'icon07'    => false,   // true = Nutzung eigener Icons für 7 Tage Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'icon24'    => false,   // true = Nutzung eigener Icons für 24 Stunden Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'ibase'     => 'https://basmilius.github.io/weather-icons/production/line/all/', // URL Base für Online-Icons (.../fill/all/ or .../line/all/)
     'iext'      => '.svg',  // Image Type Extension (.png, .svg, .jpg, ...)
+    'theme'     => 'hell',  // 'hell' oder 'dunkel' 
 ];
 #
 # Globale Übersetzungstabelle
@@ -250,7 +261,7 @@ function SetDailyWeather($days)
     // Icon holen
     $vid = CreateVariableByName($_IPS['SELF'], 'Icon', 3);
     $ico = GetValue($vid);
-    $url = GetIcon($ico);
+    $url = GetIcon($ico, 'icon01');
     // Text holen
     $vid = CreateVariableByName($_IPS['SELF'], 'Zusammenfassung', 3);
     $txt = strtr(GetValue($vid), $TRANS);
@@ -263,6 +274,43 @@ function SetDailyWeather($days)
     // Sun
     $snr = $HTML['sunrise'];
     $sns = $HTML['sunset'];
+    // Niederschlagswahrscheinlichkeit
+    $fall = '<span class="txt fall">{{fall}} Regen</span>';
+    $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlagswahrscheinlichkeit', 2);
+    if($HTML['chance'] != 0) {
+        $vid = $HTML['chance'];
+    }
+    $value = GetValueFormatted($vid);
+    $fall = str_replace('{{fall}}', $value, $fall);
+    // Wind
+    $wind = '<span class="txt wind">{{wind}}</span>';
+    $vid = CreateVariableByName($_IPS['SELF'], 'Windgeschwindigkeit', 2);
+    if($HTML['wind'] != 0) {
+        $vid = $HTML['wind'];
+    }
+    $value = GetValueFormatted($vid);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Windrichtung', 2);
+    if($HTML['direction'] != 0) {
+        $vid = $HTML['direction'];
+    }
+    $value = $value . ' ' . GetValueFormatted($vid);
+    $wind = str_replace('{{wind}}', $value, $wind);
+    // Luftfeuchtigkeit
+    $humi = '<span class="txt humi">{{humi}} Luftfeuchte</span>';
+    $vid = CreateVariableByName($_IPS['SELF'], 'Luftfeuchtigkeit', 2);
+    if($HTML['humidity'] != 0) {
+        $vid = $HTML['humidity'];
+    }
+    $value = GetValueFormatted($vid);
+    $humi = str_replace('{{humi}}', $value, $humi);
+    // Niederschlag/h
+    $rain = '<span class="txt rain">{{rain}}/h</span>';
+    $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlag/h', 2);
+    if($HTML['rain'] != 0) {
+        $vid = $HTML['rain'];
+    }
+    $value = GetValueFormatted($vid);
+    $rain = str_replace('{{rain}}', $value, $rain);
     // HTML WebFront
     if ($HTML['webfront']) {
         $htmlWF = '';
@@ -273,7 +321,7 @@ function SetDailyWeather($days)
         $htmlWF .= '.wdeb { position:absolute; top:0px; right:5px; font-size:72px; font-weight:bold; overflow:hidden;}';
         $htmlWF .= '.wdes { position:absolute; top:35px; left:10px; right: 100px; font-size:12px;  color:rgba(255, 255, 255, 0.5); overflow:hidden;}';
         $htmlWF .= '.wicb { position:absolute; bottom:0px; overflow:hidden;}';
-        $htmlWF .= '.wics { position:absolute; width:115px; top:25px; text-align:center; overflow:hidden;}';
+        $htmlWF .= '.wics { position:absolute; width:115px; top:45px; text-align:center; overflow:hidden;}';
         $htmlWF .= '.wdec { position:absolute; width:115px; bottom:35px; text-align:center; font-size:48px; font-weight:bold; overflow:hidden;}';
         $htmlWF .= '.wtec { position:absolute; width:110px; bottom:5px; text-align:center; text-overflow: ellipsis; font-size:10px;  color:rgba(255, 255, 255, 0.5); overflow:hidden;}';
         $htmlWF .= '.wder { position:absolute; bottom:42px; right:5px; text-align:right; font-size:16px; color:rgba(255, 255, 255, 0.5); overflow:hidden;}';
@@ -288,7 +336,7 @@ function SetDailyWeather($days)
         $htmlWF .= '<div class="wday">Aktuell</div>';
         $htmlWF .= '<div class="wdeb">' . (round($tmp, 0) + 0) . '°</div>';
         $htmlWF .= '<div class="wdes">' . $txt . '</div>';
-        $htmlWF .= '<div class="wicb"><img style="width:175px;" src="' . $url . '" /></div>';
+        $htmlWF .= '<div class="wicb"><img style="width:220px; height:140px;" src="' . $url . '" /></div>';
         $htmlWF .= '<div class="wsgl">&uarr;&nbsp;' . $snr . '</div>';
         $htmlWF .= '<div class="wssr">' . $sns . '&nbsp;&darr;</div>';
         $htmlWF .= '</div>';
@@ -300,10 +348,10 @@ function SetDailyWeather($days)
             $tlo = $days[$i]->temperatureLow;
             $wdy = date('D', intval($day));
             $wdy = strtr($wdy, $TRANS);
-            $ico = GetIcon($days[$i]->icon);
+            $ico = GetIcon($days[$i]->icon, 'icon03');
             $htmlWF .= '<div class="wbox" style="width:115px;">';
             $htmlWF .= '<div class="wday">' . $wdy . '</div>';
-            $htmlWF .= '<div class="wics"><img src="' . $ico . '" /></div>';
+            $htmlWF .= '<div class="wics"><img style="width:125px; height:74px;" src="' . $ico . '" /></div>';
             $htmlWF .= '<div class="wdec">' . (round($thi, 0) + 0) . '°</div>';
             $htmlWF .= '<div class="wder">' . (round($tlo, 0) + 0) . '°</div>';
             $htmlWF .= '<div class="wtec">' . $txt . '</div>';
@@ -317,36 +365,50 @@ function SetDailyWeather($days)
     }
     // HTML Tile Visu
     if ($HTML['tilevisu']) {
+        $bgc = ($HTML['theme'] == 'hell') ? '#00CDAB' : '#24625B';
+        $iif = ($HTML['theme'] == 'hell') ? ' filter: invert(0.6);' : '';
         $htmlTV = '<meta name="viewport" content="width=device-width, initial-scale=1">';
         $htmlTV .= '<style type="text/css">';
-        $htmlTV .= 'body{margin:0px;}';
-        $htmlTV .= '::-webkit-scrollbar{width:8px; }';
-        $htmlTV .= '::-webkit-scrollbar-track{background:transparent; }';
-        $htmlTV .= '::-webkit-scrollbar-thumb{background:transparent; border-radius:20px; }';
-        $htmlTV .= '::-webkit-scrollbar-thumb:hover{background:#555; }';
-        $htmlTV .= '.cardS{display:block; }';
-        $htmlTV .= '.cardM{display:none; }';
-        $htmlTV .= '.cardL{display:none; }';
-        $htmlTV .= '#grid{width:100%; height:100%; display:grid; justify-items:center; }';
-        $htmlTV .= '#grid > div{justify-content:center; align-items:center; display:flex; width:100%; }';
-        $htmlTV .= '.wdes{position:absolute; top:0px; left:0px; font-size:7vw; width:50%; overflow:hidden; }';
-        $htmlTV .= '.wdeg{position:absolute; top:0px; right:0px; font-size:25vw; line-height:1em; overflow:hidden; }';
-        $htmlTV .= '.wico{width:100%; height:80vw; position:absolute; bottom:0px; background-image:url(' . $url . '); background-size:contain; background-repeat:no-repeat; background-position-x:center; background-position-y:bottom; }';
-        $htmlTV .= '.wsgl{position:absolute; bottom:0px; left:0px; font-size:6vw; color:rgba(255,255,255,0.5); }';
-        $htmlTV .= '.wssr{position:absolute; bottom:0px; right:0px; font-size:6vw; color:rgba(255,255,255,0.5); }';
-        $htmlTV .= '.hidden{display:none; }';
+        $htmlTV .= 'body {margin:0px;}';
+        $htmlTV .= '::-webkit-scrollbar{width:8px;}';
+        $htmlTV .= '::-webkit-scrollbar-track{background:transparent;}';
+        $htmlTV .= '::-webkit-scrollbar-thumb{background:transparent; border-radius:20px;}';
+        $htmlTV .= '::-webkit-scrollbar-thumb:hover{background:#555;}';
+        $htmlTV .= '.cardS {display:block;}';
+        $htmlTV .= '.cardM {display:none;}';
+        $htmlTV .= '.cardL {display:none;}';
+        $htmlTV .= '#grid {width:100%; height:100%; display:grid; justify-items:center;}';
+        $htmlTV .= '#grid > div {justify-content:center; align-items:center; display:flex; width:100%;}';
+        $htmlTV .= '.wdes {position:absolute; top:0px; left:0px; font-size:7vw; width:50%; overflow:hidden;}';
+        $htmlTV .= '.wdeg {position:absolute; top:0px; right:0px; font-size:25vw; line-height:1em; overflow:hidden;}';
+        $htmlTV .= '.wico {width:100%; height:80vw; position:absolute; bottom:0px; background-image:url(' . $url . '); background-size:contain; background-repeat:no-repeat; background-position-x:center; background-position-y:bottom;}';
+        $htmlTV .= '.wsgl {position:absolute; bottom:0px; left:0px; font-size:6vw; opacity: 75%;}';
+        $htmlTV .= '.wssr {position:absolute; bottom:0px; right:0px; font-size:6vw; opacity: 75%;}';
+        $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px ' . $bgc . '; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
+        $htmlTV .= '.wfgd > .day {font-size: 6vh;}';
+        $htmlTV .= '.wfgd > .img {width: 48px; height: 48px; margin: auto; display: block; }';
+        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc .'; border-radius:5px; margin: 0 4px}';
+        $htmlTV .= '.wifo {position: absolute; top: 0; right: 0; display: grid; grid-template-rows: 1fr 1fr 1fr 1fr ; grid-template-columns: auto; margin: 0 auto; justify-content: center;}';
+        $htmlTV .= '.wifo > .txt {font-size: 7vh; opacity: 75%;}';
+        $htmlTV .= '.fall:before {content: ""; background: url("/preview/assets/icons/Umbrella.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
+        $htmlTV .= '.humi:before {content: ""; background: url("/preview/assets/icons/Drops.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
+        $htmlTV .= '.wind:before {content: ""; background: url("/preview/assets/icons/WindSpeed.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
+        $htmlTV .= '.rain:before {content: ""; background: url("/preview/assets/icons/Rainfall.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
+        $htmlTV .= '.hidden {display:none;}';
         $htmlTV .= '@media (aspect-ratio >1.5) {';
-        $htmlTV .= '  .cardS{display:none; }';
-        $htmlTV .= '  .cardM{display:block; }';
-        $htmlTV .= '  .cardL{display:none; }';
-        $htmlTV .= '  .wdes{font-size:4vw; width:25%;}';
-        $htmlTV .= '  .wdeg{font-size:12vw; }';
-        $htmlTV .= '  .wico{width:50%; height:80vw;}';
+        $htmlTV .= '  .cardS {display:none;}';
+        $htmlTV .= '  .cardM {display:block;}';
+        $htmlTV .= '  .cardL {display:none;}';
+        $htmlTV .= '  .wdes {font-size:3vw; width:25vw;}';
+        $htmlTV .= '  .wdeg {font-size:12vw; right: 40vw;}';
+        $htmlTV .= '  .wsgl, .wssr { font-size: 2.5vw; bottom: 57vh;}';
+        $htmlTV .= '  .wssr {right: 40vw;}';
+        $htmlTV .= '  .wico {top: 0px; height: 45vh; width: 60vw}';
         $htmlTV .= '}';
         $htmlTV .= '@media screen and (min-width:768px){';
-        $htmlTV .= '  .cardS{display:block; }';
-        $htmlTV .= '  .cardM{display:none; }';
-        $htmlTV .= '  .cardL{display:none; }';
+        $htmlTV .= '  .cardS {display:block;}';
+        $htmlTV .= '  .cardM {display:none;}';
+        $htmlTV .= '  .cardL {display:none;}';
         $htmlTV .= '}';
         $htmlTV .= '</style>';
         // Aktueller Daten
@@ -362,12 +424,37 @@ function SetDailyWeather($days)
         $htmlTV .= '</div>';
         $htmlTV .= '<!-- Medium Cards -->';
         $htmlTV .= '<div class="cardM">';
-        $htmlTV .= '        <div class="wbox">';
+        $htmlTV .= '    <div class="wbox">';
         $htmlTV .= '        <div class="wdes">' . $txt . '</div>';
-        $htmlTV .= '        <div class="wdeg">' . (round($tmp, 0) + 0) . '°</div>';
         $htmlTV .= '        <div class="wico"></div>';
+        $htmlTV .= '        <div class="wdeg">' . (round($tmp, 0) + 0) . '°</div>';
         $htmlTV .= '        <div class="wsgl">☀️&nbsp;' . $snr . '</div>';
         $htmlTV .= '        <div class="wssr">' . $sns . '&nbsp;🌓</div>';
+        $htmlTV .= '        <div class="wifo">';
+        $htmlTV .= $fall;
+        $htmlTV .= $humi;
+        $htmlTV .= $wind;
+        $htmlTV .= $rain;
+        $htmlTV .= '        </div>';
+        $htmlTV .= '        <div class="wfgd">';
+        // 7 days forecast
+        for($i = 1; $i < 8; $i++) {
+            $day = $days[$i]->temperatureHighTime;
+            $wd = date('D', intval($day));
+            $wd = strtr($wd, $TRANS);
+            $htmlTV .= '        <span class="day">' . strtoupper($wd) . '</span>';
+        }
+        // Icons
+        for($i = 1; $i < 8; $i++) {
+            $ico = $days[$i]->icon;
+            $htmlTV .= '        <img class="img" src="' . GetIcon($ico, 'icon07') . '" />';
+        }
+        // Temp
+        for($i = 1; $i < 8; $i++) {
+            $th = $days[$i]->temperatureHigh;
+            $htmlTV .= '        <span class="txt">' . (round($th, 0) + 0) . '°</span>';
+        }
+        $htmlTV .= '        </div>';
         $htmlTV .= '    </div>';
         $htmlTV .= '</div>';
         $htmlTV .= '<!-- Large Cards -->';
@@ -404,7 +491,7 @@ function SetHourlyWeather($hourly)
             $temp = $hourly[$i]->temperature;
             $rain = $hourly[$i]->precipProbability;
             $hour = date('H:i', intval($time));
-            $icon = GetIcon($hourly[$i]->icon);
+            $icon = GetIcon($hourly[$i]->icon, 'icon24');
             if ((($i + 1) % 8) == 0) {
                 $htmlWF .= '<div class="wbox" style="width:109px; margin-right:0px; margin-bottom:5px;">';
             }
@@ -435,7 +522,7 @@ function GetPrecipitation($type = null)
 }
 
 // Erstellt aus dem Icon-String eine Image-URL
-function GetIcon($ico)
+function GetIcon($ico, $type)
 {
     global $ICONS, $HTML;
 
@@ -450,7 +537,7 @@ function GetIcon($ico)
     // Basis Name ermitteln
     $icon = explode('-', $ico);
     // Woher Bilder nehmen?
-    if($HTML['icons']) {
+    if($HTML[$type]) {
         // Url ermitteln
         $found = false;
         foreach ($ICONS[$time] as $name => $url) {
