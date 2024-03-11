@@ -33,6 +33,7 @@ declare(strict_types=1);
 # 30.01.2023 - Elevation Option hinzugefügt (v2.2)
 # 06.02.2023 - Option für Sonnenuntergang hinzugefügt (v2.3)
 # 23.02.2023 - Location-Angaben werden jetzt als float angegeben (v2.4)
+# 04.03.2024 - Kleine Anpassungen für Tile Visu (v2.5)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -219,7 +220,9 @@ function BuildHtml($pos, $draw)
     $html .= '<!DOCTYPE html>';
     $html .= '<html lang="de">';
     $html .= '<head>';
+    $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
     $html .= '<style>';
+    $html .= 'body { margin: 0; overflow: hidden; }';
     $html .= '#sunmap {background: url("' . $draw['bg'] . '") no-repeat; background-size: cover; width: ' . $draw['size'] . 'px; height: ' . $draw['size'] . 'px; margin: auto;}';
     $html .= 'canvas {background: url("' . $draw['chart'] . '") no-repeat center; background-size: 100% 100%;}';
     $html .= '</style>';

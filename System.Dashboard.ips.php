@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST');
+header("Access-Control-Allow-Headers: X-Requested-With");
+
 ################################################################################
 # Script:   System.Dashboard.ips.php
 # Version:  5.2.20231116
@@ -107,6 +111,7 @@ declare(strict_types=1);
 # 07.11.2023 - Fix für neue Systemfunktionen (v5.1)
 # 16.11.2023 - Fix für Icons mit hellem Themes (v5.2)
 #              Icons für TileVisu werden auch aus dessen Assets geladen
+# 04.03.2024 - Kleine Fixes und Anpassungen für neue Tile Visu (v5.3)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
@@ -442,25 +447,25 @@ function RenderMessages($data)
     }
     if($noico) {
         if($bfort) {
-            $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px;  border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
-            $style = $style . '.msg td.txt { padding: 5px; border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
+            $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px;  border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
+            $style = $style . '.msg td.txt { padding: 5px; border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
         }
         else {
-            $style = $style . '.msg td.txt { padding: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
-            $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px; border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
+            $style = $style . '.msg td.txt { padding: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
+            $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px; border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
         }
     }
     else {
-        $style = $style . '.msg td.ico { width: 36px; padding: 1px 0px 0px 0px; border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
-        $style = $style . '.msg td.txt { padding: 2px;  border-top: 1px solid rgba(255, 255, 255, 0.1); }';
-        $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px 3px 2px 2px;  border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1); }';
+        $style = $style . '.msg td.ico { width: 36px; padding: 1px 0px 0px 0px; border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
+        $style = $style . '.msg td.txt { padding: 2px;  border-top: 1px solid rgba(255, 255, 255, 0.1);}';
+        $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px 3px 2px 2px;  border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
     }
-    $style = $style . '.msg tr:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.2); }';
-    $style = $style . '.blue {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(0, 0, 255); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); }';
-    $style = $style . '.red {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 0, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); }';
-    $style = $style . '.green {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(0, 255, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); }';
-    $style = $style . '.yellow {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 255, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); }';
-    $style = $style . '.orange {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 160, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); }';
+    $style = $style . '.msg tr:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.2);}';
+    $style = $style . '.blue {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(0, 0, 255); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
+    $style = $style . '.red {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 0, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
+    $style = $style . '.green {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(0, 255, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
+    $style = $style . '.yellow {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 255, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
+    $style = $style . '.orange {padding: 5px; color: rgb(255, 255, 255); background-color: rgb(255, 160, 0); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
     $style = $style . '</style>';
     $content = $style;
     $content = $content . '<table class="msg">';
@@ -538,10 +543,10 @@ function RenderMessages($data)
             // Button vor Text
             if($noico && $bfort) {
                 if ($message['removable']) {
-                    $content = $content . '<td class="fst"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $content = $content . '<td class="fst"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 elseif ($message['page']) {
-                    $content = $content . '<td class="btn"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=switch&page=' . $message['page'] . '\' });">OK</div></td>';
+                    $content = $content . '<td class="btn"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=switch&page=' . $message['page'] . '\' });">OK</div></td>';
                 }
                 else {
                     $content = $content . '<td class="btn"><div class="' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
@@ -551,12 +556,12 @@ function RenderMessages($data)
             // Button nach Text
             else {
                 if ($message['page']) {
-                    $content = $content . '<td class="txt"><div onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=switch&page=' . $message['page'] . '\' });">' . $message['text'] . '</div></td>';
+                    $content = $content . '<td class="txt"><div onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=switch&page=' . $message['page'] . '\' });">' . $message['text'] . '</div></td>';
                 } else {
                     $content = $content . '<td class="txt">' . $message['text'] . '</td>';
                 }
                 if ($message['removable']) {
-                    $content = $content . '<td class="btn"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $content = $content . '<td class="btn"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 else {
                     $content = $content . '<td class="btn"><div class="' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
@@ -581,23 +586,23 @@ function RenderCard($data)
     $style = '<meta name="viewport" content="width=device-width, initial-scale=1">';
     $style .= '<style type="text/css">';
     $style .= 'body {margin: 0px;}';
-    $style .= '::-webkit-scrollbar { width: 8px; }';
-    $style .= '::-webkit-scrollbar-track { background: transparent; }';
-    $style .= '::-webkit-scrollbar-thumb { background: transparent; border-radius: 20px; }';
-    $style .= '::-webkit-scrollbar-thumb:hover { background: #555; }';
-    $style .= '.card { display:block; }';
-    $style .= 'table.wwx { border-collapse: collapse; width: 100% }';
-    $style .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 5px; }';
-    $style .= '.wwx tr { border-bottom: 1px solid ' . $tbc . '; }';
-    $style .= '.wwx tr:nth-of-type(1) { border-top: 1px solid ' . $tbc . '; }';
-    $style .= '.icon {width: 24px; height: 24px;' . $iif . '}';
-    $style .= 'span { font-size: 0.9em; }';
-    $style .= '.blue {background-color: #11A0F3; }';
-    $style .= '.green {background-color: #58A906; }';
-    $style .= '.yellow {background-color: #FFC107; }';
-    $style .= '.red {background-color: #F35A2C; }';
-    $style .= '.orange {background-color: #FF9800; }';
-    $style .= '.button { color: white; cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; }';
+    $style .= '::-webkit-scrollbar { width: 8px;}';
+    $style .= '::-webkit-scrollbar-track { background: transparent;}';
+    $style .= '::-webkit-scrollbar-thumb { background: transparent; border-radius: 20px;}';
+    $style .= '::-webkit-scrollbar-thumb:hover { background: #555;}';
+    $style .= '.card { display:block;}';
+    $style .= 'table.wwx { border-collapse: collapse; width: 100%}';
+    $style .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 4px;}';
+    $style .= '.wwx tr { border-bottom: 1px solid ' . $tbc . ';}';
+    $style .= '.wwx tr:nth-of-type(1) { border-top: 1px solid ' . $tbc . ';}';
+    $style .= '.icon {width: 24px; height: 24px;' . $iif .'}';
+    $style .= 'span { font-size: 12px;}';
+    $style .= '.blue {background-color: #11A0F3;}';
+    $style .= '.green {background-color: #58A906;}';
+    $style .= '.yellow {background-color: #FFC107;}';
+    $style .= '.red {background-color: #F35A2C;}';
+    $style .= '.orange {background-color: #FF9800;}';
+    $style .= '.button { color: white; cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; font-size:14px;}';
     $style .= '</style>';
     // Sart Content
     $content = $style;
@@ -679,7 +684,7 @@ function RenderCard($data)
             // Button vor Text
             if($noico && $bfort) {
                 if ($message['removable']) {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 else {
                     $content = $content . '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
@@ -690,7 +695,7 @@ function RenderCard($data)
             else {
                 $content = $content . '<td><span>' . $message['text'] . '</span></td>';
                 if ($message['removable']) {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var HTTP = new XMLHttpRequest();HTTP.open(\'GET\',o.url,true);HTTP.send();};window.xhrGet({ url: \'hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 else {
                     $content = $content . '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
@@ -727,9 +732,9 @@ function RenderNotifications($data)
     $html = $html . 'let bs = document.querySelector("body");';
     $html = $html . 'var zoom = getComputedStyle(bs).zoom;';
     $html = $html . 'var wf = webfronts[0][0];';
-    $html = $html . 'for (i = 0; i < webfronts.length; i++) { if (webfronts[i][0] == zoom) wf = webfronts[i][1]; }';
-    $html = $html . 'window.xhrGet = function xhrGet(o) { var HTTP = new XMLHttpRequest(); HTTP.open(\'GET\', o.url, true); HTTP.send(); };';
-    $html = $html . 'function hook(p) { window.xhrGet({url: \'hook/msg?action=switch&page=\' + p + \'&webfront=\' + wf});}';
+    $html = $html . 'for (i = 0; i < webfronts.length; i++) { if (webfronts[i][0] == zoom) wf = webfronts[i][1];}';
+    $html = $html . 'window.xhrGet = function xhrGet(o) { var xhr = new XMLHttpRequest(); xhr.open(\'GET\', o.url, true);  xhr.send(); };';
+    $html = $html . 'function hook(p) { window.xhrGet({url: \'/hook/msg?action=switch&page=\' + p + \'&webfront=\' + wf});}';
     $html = $html . '</script>';
     $html = $html . '<div class="ibox">';
     foreach ($data as $key => $value) {
@@ -764,7 +769,7 @@ function Install()
     SetValueString($vid, json_encode([]));
     $vid = CreateVariableByName($_IPS['SELF'], 'Aktivitäten', 3, $pos++, '', '~HTMLBox');
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungen', 3, $pos++, '', '~HTMLBox');
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);;
     SetValueInteger($vid, 0);
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungstyp', 1, $pos++, '', $vpn, $_IPS['SELF']);
     SetValueInteger($vid, -1);

@@ -24,6 +24,7 @@ declare(strict_types=1);
 #              GetDummyByName, GetDummyByIdent
 #              GetPopupByName, GetPopupByIdent,
 #              GetVariableByName und GetVariableByName hinzugefügt  (v4.0)
+# 04.03.2024 - Kleine Anpassungen für Events (v4.1)
 #
 ################################################################################
 
@@ -479,6 +480,8 @@ function CreateTimerByName($id, $name, $time = 0, $repeat = true)
         IPS_SetName($eid, $name);
         IPS_SetPosition($eid, -1);
         IPS_SetHidden($eid, true);
+    }
+    if (($eid !== false) && ($time > 0)) {
         if ($repeat == true) {
             // 0 = Tägliche Ausführung
             IPS_SetEventCyclic($eid, 0, 1, 0, 0, 2, $time);
@@ -496,6 +499,9 @@ function CreateTimerByName($id, $name, $time = 0, $repeat = true)
         if (function_exists('IPS_SetEventAction')) {
             IPS_SetEventAction($eid, ExtractGuid('Run Automation'), []);
         }
+    }
+    if (($eid !== false) && ($time == -1)) {
+        IPS_SetEventActive($eid, false);
     }
     return $eid;
 }

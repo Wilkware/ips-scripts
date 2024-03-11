@@ -45,6 +45,7 @@ declare(strict_types=1);
 #              und All-In-One Script (v2.0)
 # 17.03.2023 - Fix für Archive Control (v2.1)
 # 26.03.2023 - Fix Style & Logging (v2.2)
+# 04.03.2024 - Fix für Archivdaten (v2.3)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -146,17 +147,21 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
             SetValueString($vid, $json);
             // aktuellen Werte abgleichen wenn notwendig
             $vid = CreateVariableByName($cid, 'Prognose Heute', 2);
-            $lv = GetValueFloat($vid);
-            if ($lv < $data['Heute']) {
-                SetValueFloat($vid, $data['Heute']);
-            } elseif ($lv > $data['Heute']) {
-                //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
-                $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
-                $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
-                AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
-                SetValueFloat($vid, $data['Heute']);
-                IPS_Sleep(1000);
-                AC_ReAggregateVariable($aid, $vid);
+            if($data['Heute'] > 0) {
+                $lv = GetValueFloat($vid);
+                if ($lv < $data['Heute']) {
+                    SetValueFloat($vid, $data['Heute']);
+                } elseif ($lv == $data['Heute']) {
+                    // Do nothing
+                } else {
+                    //Den letzten Wert, der in der Datenbank gespeichert wurde, holen
+                    $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
+                    $last = AC_GetLoggedValues($aid, $vid, 0, 0, 1)[0];
+                    AC_DeleteVariableData($aid, $vid, $last['TimeStamp'], 0);
+                    SetValueFloat($vid, $data['Heute']);
+                    IPS_Sleep(1000);
+                    AC_ReAggregateVariable($aid, $vid);
+                }
             }
             unset($data['Heute']);
             $vid = CreateVariableByName($cid, 'Prognose Morgen', 2);

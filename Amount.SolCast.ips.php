@@ -235,7 +235,7 @@ function RequestData($plant, $forecast = true)
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
     curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
     curl_setopt($ch, CURLOPT_ENCODING, '');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -412,7 +412,7 @@ function DrawChart($data)
             scaleLabel: {
             fontColor: '#fff',
             display: true,
-            labelString: 'Leistung (kW)'
+            labelString: 'Leistung (Watt)'
             }
         }]
         }

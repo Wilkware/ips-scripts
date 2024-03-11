@@ -37,6 +37,7 @@ declare(strict_types=1);
 # 06.11.2023 - Anpassung für Nutzung via Pitti's Skript-Bibliothek (v3.0)
 # 16.11.2023 - Erweiterungen für Tile Visu (v3.1)
 #              Unterstützung von Themes, Vorhersage und einiges mehr
+# 04.03.2024 - Kleine Anpassungen für Tile Visu (v3.2)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
@@ -63,11 +64,11 @@ if ($LCID != 0) {
 # Settings für HTML-Boxen;
 $HTML = [
     'temp'      => 0,       // ID eigenen Temperaturvariable, z.B. von Wetterstation
-    'chance'    => 0,       // ID eigener Niederschlagswahrscheinlichkeit, z.B. von Wetterstation
-    'wind'      => 0,       // ID eigener Windgeschwindigkeit, z.B. von Wetterstation
-    'direction' => 0,       // ID eigener Windrichtung, z.B. von Wetterstation
-    'humidity'  => 0,       // ID eigener Luftfeutigkeit (Aussen), z.B. von Wetterstation
-    'rain'      => 0,       // ID eigener Niederschlagsmenge, z.B. von Wetterstation
+    'chance'    => 0,       // ID eigener Niederschlagswahrscheinlichkeit
+    'wind'      => 0,       // ID eigener Windgeschwindigkeit
+    'direction' => 0,       // ID eigener Windrichtung
+    'humidity'  => 0,       // ID eigener Luftfeutigkeit (Aussen)
+    'rain'      => 0,       // ID eigener Niederschlag/Tag
     'sunrise'   => date_sunrise(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),  // Uhrzeit 'hh:mm' für Sonnenaufgang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'sunset'    => date_sunset(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),   // Uhrzeit 'hh:mm' für Sonnenuntergang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'webfront'  => true,    // true = Support für WebFront ('3-Tage-Wetter' & '24-Stunden--Wetter'), IPS <= v6.4
@@ -78,7 +79,7 @@ $HTML = [
     'icon24'    => false,   // true = Nutzung eigener Icons für 24 Stunden Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'ibase'     => 'https://basmilius.github.io/weather-icons/production/line/all/', // URL Base für Online-Icons (.../fill/all/ or .../line/all/)
     'iext'      => '.svg',  // Image Type Extension (.png, .svg, .jpg, ...)
-    'theme'     => 'hell',  // 'hell' oder 'dunkel'
+    'theme'     => 'hell',  // 'hell' oder 'dunkel' 
 ];
 #
 # Globale Übersetzungstabelle
@@ -110,6 +111,7 @@ $TRANS = [
     'Cloudy'        => 'Bewölkt',
     'Partly Cloudy' => 'Teilweise bewölkt',
     'Rain'          => 'Regen',
+    'Snow'          => 'Schnee',
 ];
 #
 # Icon Mapping Array - freies Mapping auf eigene lokale Icons
@@ -196,8 +198,8 @@ elseif($_IPS['SENDER'] == 'TimerEvent') {
     // Handle the error
     if ($json === false) {
         $error = error_get_last();
-        IPS_LogMessage('WEATHER', print_r($error, true));
-        exit();
+        IPS_LogMessage('WEATHER', $error['message']);
+        return;
     }
     $data = json_decode($json);
     // Aktuelle Daten
@@ -271,6 +273,7 @@ function SetDailyWeather($days)
         $vid = $HTML['temp'];
     }
     $tmp = GetValue($vid);
+    $tmp = intval(round($tmp, 0)) + 0;
     // Sun
     $snr = $HTML['sunrise'];
     $sns = $HTML['sunset'];
@@ -304,7 +307,7 @@ function SetDailyWeather($days)
     $value = GetValueFormatted($vid);
     $humi = str_replace('{{humi}}', $value, $humi);
     // Niederschlag/h
-    $rain = '<span class="txt rain">{{rain}}/h</span>';
+    $rain = '<span class="txt rain">{{rain}}/Tag</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlag/h', 2);
     if($HTML['rain'] != 0) {
         $vid = $HTML['rain'];
@@ -334,7 +337,7 @@ function SetDailyWeather($days)
         $htmlWF .= '<div class="wdiv">';
         $htmlWF .= '<div class="wbox" style="width:225px;">';
         $htmlWF .= '<div class="wday">Aktuell</div>';
-        $htmlWF .= '<div class="wdeb">' . (round($tmp, 0) + 0) . '°</div>';
+        $htmlWF .= '<div class="wdeb">' . $tmp . '°</div>';
         $htmlWF .= '<div class="wdes">' . $txt . '</div>';
         $htmlWF .= '<div class="wicb"><img style="width:220px; height:140px;" src="' . $url . '" /></div>';
         $htmlWF .= '<div class="wsgl">&uarr;&nbsp;' . $snr . '</div>';
@@ -352,8 +355,8 @@ function SetDailyWeather($days)
             $htmlWF .= '<div class="wbox" style="width:115px;">';
             $htmlWF .= '<div class="wday">' . $wdy . '</div>';
             $htmlWF .= '<div class="wics"><img style="width:125px; height:74px;" src="' . $ico . '" /></div>';
-            $htmlWF .= '<div class="wdec">' . (round($thi, 0) + 0) . '°</div>';
-            $htmlWF .= '<div class="wder">' . (round($tlo, 0) + 0) . '°</div>';
+            $htmlWF .= '<div class="wdec">' . (intval(round($thi, 0)) + 0) . '°</div>';
+            $htmlWF .= '<div class="wder">' . (intval(round($tlo, 0)) + 0) . '°</div>';
             $htmlWF .= '<div class="wtec">' . $txt . '</div>';
             $htmlWF .= '</div>';
         }
@@ -387,9 +390,9 @@ function SetDailyWeather($days)
         $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px ' . $bgc . '; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
         $htmlTV .= '.wfgd > .day {font-size: 6vh;}';
         $htmlTV .= '.wfgd > .img {width: 48px; height: 48px; margin: auto; display: block; }';
-        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc . '; border-radius:5px; margin: 0 4px}';
+        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc .'; border-radius:5px; margin: 0 4px; font-size: small;}';
         $htmlTV .= '.wifo {position: absolute; top: 0; right: 0; display: grid; grid-template-rows: 1fr 1fr 1fr 1fr ; grid-template-columns: auto; margin: 0 auto; justify-content: center;}';
-        $htmlTV .= '.wifo > .txt {font-size: 7vh; opacity: 75%;}';
+        $htmlTV .= '.wifo > .txt {font-size: 6vh; opacity: 75%;}';
         $htmlTV .= '.fall:before {content: ""; background: url("/preview/assets/icons/Umbrella.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
         $htmlTV .= '.humi:before {content: ""; background: url("/preview/assets/icons/Drops.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
         $htmlTV .= '.wind:before {content: ""; background: url("/preview/assets/icons/WindSpeed.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
@@ -416,7 +419,7 @@ function SetDailyWeather($days)
         $htmlTV .= '<div class="cardS">';
         $htmlTV .= '    <div class="wbox">';
         $htmlTV .= '        <div class="wdes">' . $txt . '</div>';
-        $htmlTV .= '        <div class="wdeg">' . (round($tmp, 0) + 0) . '°</div>';
+        $htmlTV .= '        <div class="wdeg">' . $tmp . '°</div>';
         $htmlTV .= '        <div class="wico"></div>';
         $htmlTV .= '        <div class="wsgl">☀️&nbsp;' . $snr . '</div>';
         $htmlTV .= '        <div class="wssr">' . $sns . '&nbsp;🌓</div>';
@@ -427,7 +430,7 @@ function SetDailyWeather($days)
         $htmlTV .= '    <div class="wbox">';
         $htmlTV .= '        <div class="wdes">' . $txt . '</div>';
         $htmlTV .= '        <div class="wico"></div>';
-        $htmlTV .= '        <div class="wdeg">' . (round($tmp, 0) + 0) . '°</div>';
+        $htmlTV .= '        <div class="wdeg">' . $tmp . '°</div>';
         $htmlTV .= '        <div class="wsgl">☀️&nbsp;' . $snr . '</div>';
         $htmlTV .= '        <div class="wssr">' . $sns . '&nbsp;🌓</div>';
         $htmlTV .= '        <div class="wifo">';
@@ -452,7 +455,7 @@ function SetDailyWeather($days)
         // Temp
         for($i = 1; $i < 8; $i++) {
             $th = $days[$i]->temperatureHigh;
-            $htmlTV .= '        <span class="txt">' . (round($th, 0) + 0) . '°</span>';
+            $htmlTV .= '        <span class="txt">' . (intval(round($th, 0)) + 0) . '°</span>';
         }
         $htmlTV .= '        </div>';
         $htmlTV .= '    </div>';
@@ -500,7 +503,7 @@ function SetHourlyWeather($hourly)
             }
             $htmlWF .= '<div class="wday">' . $hour . '</div>';
             $htmlWF .= '<div class="wics"><img style="width:75px;" src="' . $icon . '"></img></div>';
-            $htmlWF .= '<div class="wdec">' . (round($temp, 0) + 0) . '°</div>';
+            $htmlWF .= '<div class="wdec">' . (intval(round($temp, 0)) + 0) . '°</div>';
             $htmlWF .= '<div class="wder">' . number_format($rain * 100) . '%</div>';
             $htmlWF .= '<div class="wtec">' . $text . '</div>';
             $htmlWF .= '</div>';

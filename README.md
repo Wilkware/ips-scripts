@@ -1,7 +1,7 @@
 # IP Symcon Skript Bibliothek
 
 [![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
-[![Product](https://img.shields.io/badge/Symcon%20Version-6.0-blue.svg)](https://www.symcon.de/produkt/)
+[![Product](https://img.shields.io/badge/Symcon%20Version-6.4-blue.svg)](https://www.symcon.de/produkt/)
 [![Version](https://img.shields.io/badge/Library%20Version-2.0.20231117-orange.svg)](https://github.com/Wilkware/ips-scripts)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Actions](https://github.com/Wilkware/ips-scripts/workflows/Check%20Style/badge.svg)](https://github.com/Wilkware/ips-scripts/actions)
@@ -16,7 +16,7 @@ Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welch
 
 ### 1. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.4
 * Visual Studio Editor mit installierter [FTP-Sync Erweiterung](https://marketplace.visualstudio.com/items?itemName=faulty.ftp-sync-improved)
 
 ### 2. Anwendung
@@ -24,6 +24,10 @@ Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welch
 Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von Skripte](https://wilkware.de/2022/03/versionierung-skripte/)' näher beschrieben.
 
 ### 3. Versionshistorie
+
+v2.1.20240304
+
+* _NEU_: Kleinere Fixes primär für neue Tile Visu
 
 v2.0.20231117
 
