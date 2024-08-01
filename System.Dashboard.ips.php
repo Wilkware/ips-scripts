@@ -116,7 +116,7 @@ header('Access-Control-Allow-Headers: X-Requested-With');
 # ----------------------------- Konfigruration ---------------------------------
 #
 # WebFront Configuration (ID)
-$wfc = 52523;
+$wfc = 0;
 # First In First Out - erste Meldung wird zuerst dargestellt, sonst
 # letzte Meldung zuerst (LIFO).
 $fifo = false;
