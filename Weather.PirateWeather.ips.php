@@ -79,7 +79,7 @@ $HTML = [
     'icon24'    => false,   // true = Nutzung eigener Icons für 24 Stunden Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'ibase'     => 'https://basmilius.github.io/weather-icons/production/line/all/', // URL Base für Online-Icons (.../fill/all/ or .../line/all/)
     'iext'      => '.svg',  // Image Type Extension (.png, .svg, .jpg, ...)
-    'theme'     => 'hell',  // 'hell' oder 'dunkel' 
+    'theme'     => 'hell',  // 'hell' oder 'dunkel'
 ];
 #
 # Globale Übersetzungstabelle
@@ -189,12 +189,12 @@ if ($_IPS['SENDER'] == 'Execute') {
     IPS_SetPosition($eid, -1);
 }
 // TIMER EVENT
-elseif($_IPS['SENDER'] == 'TimerEvent') {
+elseif ($_IPS['SENDER'] == 'TimerEvent') {
     //  Daten abholen
     $url = "https://api.pirateweather.net/forecast/$API/$LAT,$LON?exclude=minutely&lang=de&units=ca";
-    if($DEBUG) EchoDebug('WEATHER', $url);
+    if ($DEBUG) EchoDebug('WEATHER', $url);
     $json = @file_get_contents($url);
-    if($DEBUG) EchoDebug('WEATHER', $json);
+    if ($DEBUG) EchoDebug('WEATHER', $json);
     // Handle the error
     if ($json === false) {
         $error = error_get_last();
@@ -280,7 +280,7 @@ function SetDailyWeather($days)
     // Niederschlagswahrscheinlichkeit
     $fall = '<span class="txt fall">{{fall}} Regen</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlagswahrscheinlichkeit', 2);
-    if($HTML['chance'] != 0) {
+    if ($HTML['chance'] != 0) {
         $vid = $HTML['chance'];
     }
     $value = GetValueFormatted($vid);
@@ -288,12 +288,12 @@ function SetDailyWeather($days)
     // Wind
     $wind = '<span class="txt wind">{{wind}}</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Windgeschwindigkeit', 2);
-    if($HTML['wind'] != 0) {
+    if ($HTML['wind'] != 0) {
         $vid = $HTML['wind'];
     }
     $value = GetValueFormatted($vid);
     $vid = CreateVariableByName($_IPS['SELF'], 'Windrichtung', 2);
-    if($HTML['direction'] != 0) {
+    if ($HTML['direction'] != 0) {
         $vid = $HTML['direction'];
     }
     $value = $value . ' ' . GetValueFormatted($vid);
@@ -301,7 +301,7 @@ function SetDailyWeather($days)
     // Luftfeuchtigkeit
     $humi = '<span class="txt humi">{{humi}} Luftfeuchte</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Luftfeuchtigkeit', 2);
-    if($HTML['humidity'] != 0) {
+    if ($HTML['humidity'] != 0) {
         $vid = $HTML['humidity'];
     }
     $value = GetValueFormatted($vid);
@@ -309,7 +309,7 @@ function SetDailyWeather($days)
     // Niederschlag/h
     $rain = '<span class="txt rain">{{rain}}/Tag</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlag/h', 2);
-    if($HTML['rain'] != 0) {
+    if ($HTML['rain'] != 0) {
         $vid = $HTML['rain'];
     }
     $value = GetValueFormatted($vid);
@@ -344,7 +344,7 @@ function SetDailyWeather($days)
         $htmlWF .= '<div class="wssr">' . $sns . '&nbsp;&darr;</div>';
         $htmlWF .= '</div>';
         // Forcast (next 3 Days)
-        for($i = 1; $i < 4; $i++) {
+        for ($i = 1; $i < 4; $i++) {
             $day = $days[$i]->time;
             $sum = strtr($days[$i]->summary, $TRANS);
             $thi = $days[$i]->temperatureHigh;
@@ -390,7 +390,7 @@ function SetDailyWeather($days)
         $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px ' . $bgc . '; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
         $htmlTV .= '.wfgd > .day {font-size: 6vh;}';
         $htmlTV .= '.wfgd > .img {width: 48px; height: 48px; margin: auto; display: block; }';
-        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc .'; border-radius:5px; margin: 0 4px; font-size: small;}';
+        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc . '; border-radius:5px; margin: 0 4px; font-size: small;}';
         $htmlTV .= '.wifo {position: absolute; top: 0; right: 0; display: grid; grid-template-rows: 1fr 1fr 1fr 1fr ; grid-template-columns: auto; margin: 0 auto; justify-content: center;}';
         $htmlTV .= '.wifo > .txt {font-size: 6vh; opacity: 75%;}';
         $htmlTV .= '.fall:before {content: ""; background: url("/preview/assets/icons/Umbrella.svg") no-repeat; background-size: cover; width: 4vw; height: 100%; float: left; margin: 0 6px 0 0;' . $iif . '}';
@@ -441,19 +441,19 @@ function SetDailyWeather($days)
         $htmlTV .= '        </div>';
         $htmlTV .= '        <div class="wfgd">';
         // 7 days forecast
-        for($i = 1; $i < 8; $i++) {
+        for ($i = 1; $i < 8; $i++) {
             $day = $days[$i]->temperatureHighTime;
             $wd = date('D', intval($day));
             $wd = strtr($wd, $TRANS);
             $htmlTV .= '        <span class="day">' . strtoupper($wd) . '</span>';
         }
         // Icons
-        for($i = 1; $i < 8; $i++) {
+        for ($i = 1; $i < 8; $i++) {
             $ico = $days[$i]->icon;
             $htmlTV .= '        <img class="img" src="' . GetIcon($ico, 'icon07') . '" />';
         }
         // Temp
-        for($i = 1; $i < 8; $i++) {
+        for ($i = 1; $i < 8; $i++) {
             $th = $days[$i]->temperatureHigh;
             $htmlTV .= '        <span class="txt">' . (intval(round($th, 0)) + 0) . '°</span>';
         }
@@ -488,7 +488,7 @@ function SetHourlyWeather($hourly)
         $htmlWF .= '</style>';
         $htmlWF .= '<div class="wdiv">';
         // nächsten 24h reichen!
-        for($i = 0; $i < 24; $i++) {
+        for ($i = 0; $i < 24; $i++) {
             $time = $hourly[$i]->time;
             $text = strtr($hourly[$i]->summary, $TRANS);
             $temp = $hourly[$i]->temperature;
@@ -540,7 +540,7 @@ function GetIcon($ico, $type)
     // Basis Name ermitteln
     $icon = explode('-', $ico);
     // Woher Bilder nehmen?
-    if($HTML[$type]) {
+    if ($HTML[$type]) {
         // Url ermitteln
         $found = false;
         foreach ($ICONS[$time] as $name => $url) {
@@ -549,7 +549,7 @@ function GetIcon($ico, $type)
                 return $url;
             }
         }
-        if($found == false) {
+        if ($found == false) {
             IPS_LogMessage('WEATHER', 'Forecast Icon: ' . $ico);
         }
         return $ICONS['unknown']['icon'];

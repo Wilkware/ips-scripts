@@ -147,7 +147,7 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
             SetValueString($vid, $json);
             // aktuellen Werte abgleichen wenn notwendig
             $vid = CreateVariableByName($cid, 'Prognose Heute', 2);
-            if($data['Heute'] > 0) {
+            if ($data['Heute'] > 0) {
                 $lv = GetValueFloat($vid);
                 if ($lv < $data['Heute']) {
                     SetValueFloat($vid, $data['Heute']);

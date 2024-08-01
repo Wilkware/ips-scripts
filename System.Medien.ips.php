@@ -19,12 +19,12 @@ declare(strict_types=1);
 $media = __WWX['IDM_ROOT'];
 
 // AUFRUF WEBHOOK
-if($_IPS['SENDER'] == 'WebHook') {
+if ($_IPS['SENDER'] == 'WebHook') {
     $root = isset($_GET['root']) ? $_GET['root'] : $media;
     $name = isset($_GET['name']) ? $_GET['name'] : '';
     $type = isset($_GET['type']) ? $_GET['type'] : 'image/png'; // default: immage/png | oder audio/mpeg ...
 
-    if($name != '') {
+    if ($name != '') {
         $mid = IPS_GetMediaIDByName($name, $root);
         if ($mid === false) {
             header('HTTP/1.0 404 Not Found');

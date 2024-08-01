@@ -94,7 +94,7 @@ function CreateIdent($name, $lower = false)
  */
 function GetObjectByIdent($id, $ident, $internal = true)
 {
-    if($internal) {
+    if ($internal) {
         $ident = CreateIdent($ident);
     }
     return @IPS_GetObjectIDByIdent($ident, $id);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
-header("Access-Control-Allow-Headers: X-Requested-With");
+header('Access-Control-Allow-Headers: X-Requested-With');
 
 ################################################################################
 # Script:   System.Dashboard.ips.php
@@ -111,12 +111,12 @@ header("Access-Control-Allow-Headers: X-Requested-With");
 # 07.11.2023 - Fix für neue Systemfunktionen (v5.1)
 # 16.11.2023 - Fix für Icons mit hellem Themes (v5.2)
 #              Icons für TileVisu werden auch aus dessen Assets geladen
-# 04.03.2024 - Kleine Fixes und Anpassungen für neue Tile Visu (v5.3)
+# 01.08.2024 - Fix für neue awesome Icons (v5.3)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
 # WebFront Configuration (ID)
-$wfc = 0;
+$wfc = 52523;
 # First In First Out - erste Meldung wird zuerst dargestellt, sonst
 # letzte Meldung zuerst (LIFO).
 $fifo = false;
@@ -132,6 +132,11 @@ $bfort = false;
 $bpage = true;
 # Flag, für hellen oder dunklem Theme in der TileVisu
 $light = false;
+# Flag, welche Icon Ressourcen für IPS v7.x genutzt werden sollen
+#   0 = altes WF (IPS v6.x)
+#   1 = Assets (IPS v7.0 - v7.1)
+#   2 = Aweaome (IPS ab v7.2)
+$icons = 2;
 # Profile Message Typen
 $types = [
     [-1, 'Alle', '', 0x808080],
@@ -156,20 +161,20 @@ if ($_IPS['SENDER'] == 'Execute') {
     Install();
 }
 // WEBFRONT
-elseif($_IPS['SENDER'] == 'WebFront') {
+elseif ($_IPS['SENDER'] == 'WebFront') {
     SetValue($_IPS['VARIABLE'], $_IPS['VALUE']);
-    if($_IPS['VALUE'] == -1) {
+    if ($_IPS['VALUE'] == -1) {
         $result = RemoveAllMessages();
     }
     else {
         $result = RemoveTypes($_IPS['VALUE']);
     }
-    if($result != 1) {
+    if ($result != 1) {
         echo 'Fehler beim Löschen aufgetreten!';
     }
 }
 // SCRIPTAUSFUEHRUNG
-elseif($_IPS['SENDER'] == 'RunScript') {
+elseif ($_IPS['SENDER'] == 'RunScript') {
     $result = 0;
     switch ($_IPS['action']) {
         case 'notify':
@@ -234,13 +239,13 @@ elseif($_IPS['SENDER'] == 'RunScript') {
     echo $result;
 }
 // TIMER EVENT
-elseif($_IPS['SENDER'] == 'TimerEvent') {
+elseif ($_IPS['SENDER'] == 'TimerEvent') {
     $number = explode('#', IPS_GetName($_IPS['EVENT']));
     $number = $number[1];
     RemoveMessage($number);
 }
 // AUFRUF WEBHOOK
-elseif($_IPS['SENDER'] == 'WebHook') {
+elseif ($_IPS['SENDER'] == 'WebHook') {
     $result = 0;
     switch ($_GET['action']) {
         case 'remove':
@@ -255,7 +260,7 @@ elseif($_IPS['SENDER'] == 'WebHook') {
             if (is_string($page) && $page != '') {
                 $split = explode(',', $page);
                 $result = SwitchPage($wfc, $split[0]);
-                if(isset($split[1]) && ($split[1] != '')) {
+                if (isset($split[1]) && ($split[1] != '')) {
                     OpenPopup($wfc, $split[1]);
                 }
             }
@@ -297,8 +302,8 @@ function RemoveTypes($type)
     $result = 0;
     if (IPS_SemaphoreEnter($_IPS['SELF'] . 'DataUpdate', 2000)) {
         $data = json_decode(GetValueString($did), true);
-        foreach($data as $id => $val) {
-            if($val['type'] == $type) {
+        foreach ($data as $id => $val) {
+            if ($val['type'] == $type) {
                 unset($data[$id]);
                 $eid = @IPS_GetEventIDByName('Remove Message #' . $id, $_IPS['SELF']);
                 if ($eid !== false) {
@@ -395,8 +400,8 @@ function ShowNotification($name, $ident, $count, $image, $page)
         if (!is_array($json)) {
             $json = [];
         }
-        if($ident != -1) {
-            if(isset($json[$name])) {
+        if ($ident != -1) {
+            if (isset($json[$name])) {
                 $data = $json[$name]['count'];
             }
             $data[$ident] = $count;
@@ -439,14 +444,14 @@ function RenderMessages($data)
     // Etwas CSS und HTML
     $style = '';
     $style = $style . '<style type="text/css">';
-    if($cnt == 0 && $nomsg) {
+    if ($cnt == 0 && $nomsg) {
         $style = $style . 'table.msg { width:100%;}';
     }
     else {
         $style = $style . 'table.msg { width:100%; border-collapse: collapse; border-spacing: 0px;}';
     }
-    if($noico) {
-        if($bfort) {
+    if ($noico) {
+        if ($bfort) {
             $style = $style . '.msg td.btn { width: 49px; text-align:center; padding: 2px;  border-left: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
             $style = $style . '.msg td.txt { padding: 5px; border-right: 1px solid rgba(255, 255, 255, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.1);}';
         }
@@ -472,16 +477,16 @@ function RenderMessages($data)
 
     if ($cnt == 0) {
         // Keine Meldung, dann sagen wir das auch ;-)
-        if(!$nomsg) {
+        if (!$nomsg) {
             $content = $content . '<tr>';
             $class = 'ico';
             // Icon?
-            if(!$noico) {
+            if (!$noico) {
                 $content = $content . '<td class="ico"><img src="img/icons/Ok.svg"></img></td>';
                 $class = 'txt';
             }
             // Button vor Text
-            if($noico && $bfort) {
+            if ($noico && $bfort) {
                 $content = $content . '<td class="btn"><div class="green" onclick="alert("Nachricht kann nicht bestätigt werden.");">OK</div></td>';
                 $content = $content . '<td class="txt">Keine Meldungen vorhanden!</td>';
             }
@@ -499,7 +504,7 @@ function RenderMessages($data)
     }
     else {
         // fifo or lifo
-        if(!$fifo) {
+        if (!$fifo) {
             $data = array_reverse($data, true);
         }
         foreach ($data as $number => $message) {
@@ -537,11 +542,11 @@ function RenderMessages($data)
             }
             $content .= '<tr>';
             // Icon?
-            if(!$noico) {
+            if (!$noico) {
                 $content = $content . '<td class="ico">' . $image . '</td>';
             }
             // Button vor Text
-            if($noico && $bfort) {
+            if ($noico && $bfort) {
                 if ($message['removable']) {
                     $content = $content . '<td class="fst"><div class="' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
@@ -577,70 +582,74 @@ function RenderMessages($data)
 // Meldungen als HTML Card zusammenbauen.
 function RenderCard($data)
 {
-    global $fifo, $nomsg, $noico, $bfort, $bpage, $light;
+    global $fifo, $nomsg, $noico, $bfort, $bpage, $icons, $light;
     $mid = CreateVariableByName($_IPS['SELF'], 'Texttafel', 3);
     $cnt = count($data);
-    $iif = ($light) ? ' filter: invert(0.6);' : '';
-    $tbc = ($light) ? '#D7D6D6' : '#4A4B4D';
-    // Etwas CSS und HTML
-    $style = '<meta name="viewport" content="width=device-width, initial-scale=1">';
-    $style .= '<style type="text/css">';
-    $style .= 'body {margin: 0px;}';
-    $style .= '::-webkit-scrollbar { width: 8px;}';
-    $style .= '::-webkit-scrollbar-track { background: transparent;}';
-    $style .= '::-webkit-scrollbar-thumb { background: transparent; border-radius: 20px;}';
-    $style .= '::-webkit-scrollbar-thumb:hover { background: #555;}';
-    $style .= '.card { display:block;}';
-    $style .= 'table.wwx { border-collapse: collapse; width: 100%}';
-    $style .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 4px;}';
-    $style .= '.wwx tr { border-bottom: 1px solid ' . $tbc . ';}';
-    $style .= '.wwx tr:nth-of-type(1) { border-top: 1px solid ' . $tbc . ';}';
-    $style .= '.icon {width: 24px; height: 24px;' . $iif .'}';
-    $style .= 'span { font-size: 12px;}';
-    $style .= '.blue {background-color: #11A0F3;}';
-    $style .= '.green {background-color: #58A906;}';
-    $style .= '.yellow {background-color: #FFC107;}';
-    $style .= '.red {background-color: #F35A2C;}';
-    $style .= '.orange {background-color: #FF9800;}';
-    $style .= '.button { color: white; cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; font-size:14px;}';
-    $style .= '</style>';
-    // Sart Content
-    $content = $style;
-    $content .= '<div class="card">';
-    $content .= '<table class="wwx">';
-    $content .= '<colgroup>';
-    $content .= '<col width=20em">';
-    $content .= '<col width=500em">';
-    $content .= '<col width=50em">';
-    $content .= '</colgroup>';
+    $iif = ($light) ? ' filter: invert(0.6); ' : ' ';
+    // HTML zusammenbauen
+    $html = '';
+    // Stylesheets
+    $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
+    $html .= '<style type="text/css">';
+    $html .= 'body {margin: 0px;}';
+    $html .= '::-webkit-scrollbar { width: 8px; }';
+    $html .= '::-webkit-scrollbar-track { background: transparent; }';
+    $html .= '::-webkit-scrollbar-thumb { background: transparent; border-radius: 20px; }';
+    $html .= '::-webkit-scrollbar-thumb:hover { background: #555; }';
+    $html .= '.card { display:block; }';
+    $html .= 'table.wwx { border-collapse: collapse; width: 100%; font-size:14px; }';
+    $html .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 4px; }';
+    $html .= '.wwx tr { border-bottom: 1px solid color-mix(in srgb, currentcolor 25%, transparent); }';
+    $html .= '.wwx tr:nth-of-type(1) { border-top: 1px solid color-mix(in srgb, currentcolor 25%, transparent); }';
+    $html .= '.icon {width: 24px; height: 24px;' . $iif . '}';
+    $html .= 'span { font-size: 12px; }';
+    $html .= '.blue {background-color: #11A0F3; }';
+    $html .= '.green {background-color: #58A906; }';
+    $html .= '.yellow {background-color: #FFC107; }';
+    $html .= '.red {background-color: #F35A2C; }';
+    $html .= '.orange {background-color: #FF9800; }';
+    $html .= '.button { color: white; cursor: pointer; border-radius: 5px; min-width: 2.5em; text-align: center; font-size:14px; }';
+    $html .= '</style>';
+    // Script für Icons
+    if ($icons == 2) {
+        $html .= '<script src="./icons.js"></script>';
+    }
+    // Start Content
+    $html .= '<div class="card">';
+    $html .= '<table class="wwx">';
+    $html .= '<colgroup>';
+    $html .= '<col width=20em">';
+    $html .= '<col width=500em">';
+    $html .= '<col width=50em">';
+    $html .= '</colgroup>';
     if ($cnt == 0) {
         // Keine Meldung, dann sagen wir das auch ;-)
-        if(!$nomsg) {
-            $content = $content . '<tr>';
+        if (!$nomsg) {
+            $html .= '<tr>';
             // Icon?
-            if(!$noico) {
-                $content = $content . '<td><img class="icon" src="/preview/assets/icons/Ok.svg"></img></td>';
+            if (!$noico) {
+                $html .= '<td>' . GetImage($icons, 'Ok') . '</td>';
             }
             // Button vor Text
-            if($noico && $bfort) {
-                $content = $content . '<td><div class="button green" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
-                $content = $content . '<td><span>Keine Meldungen vorhanden!</span></td>';
+            if ($noico && $bfort) {
+                $html .= '<td><div class="button green" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
+                $html .= '<td><span>Keine Meldungen vorhanden!</span></td>';
             }
             // Button nach Text
             else {
-                $content = $content . '<td><span>Keine Meldungen vorhanden!</span></td>';
-                $content = $content . '<td><div class="button green" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
+                $html .= '<td><span>Keine Meldungen vorhanden!</span></td>';
+                $html .= '<td><div class="button green" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
             }
-            $content = $content . '</tr>';
+            $html .= '</tr>';
         }
         // Keine Meldung, keine Ausgabe
         else {
-            $content = '';
+            $Html = '';
         }
     }
     else {
         // fifo or lifo
-        if(!$fifo) {
+        if (!$fifo) {
             $data = array_reverse($data, true);
         }
         foreach ($data as $number => $message) {
@@ -671,42 +680,42 @@ function RenderCard($data)
                 if (isset($message['timestamp'])) {
                     $title .= 'title="' . date('d.m.Y H:i', $message['timestamp']) . '" ';
                 }
-                $image = '<img class="icon" src="/preview/assets/icons/' . $message['image'] . '.svg"' . $title . '></img>';
+                $image = GetImage($icons, $message['image'], $title);
             }
             else {
-                $image = '<img class="icon" src="/preview/assets/icons/Ok.svg"></img>';
+                $image = GetImage($icons, 'Ok');
             }
-            $content .= '<tr>';
+            $html .= '<tr>';
             // Icon?
-            if(!$noico) {
-                $content = $content . '<td>' . $image . '</td>';
+            if (!$noico) {
+                $html .= '<td>' . $image . '</td>';
             }
             // Button vor Text
-            if($noico && $bfort) {
+            if ($noico && $bfort) {
                 if ($message['removable']) {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $html .= '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 else {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
+                    $html .= '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
                 }
-                $content = $content . '<td><span>' . $message['text'] . '</span></td>';
+                $html .= '<td><span>' . $message['text'] . '</span></td>';
             }
             // Button nach Text
             else {
-                $content = $content . '<td><span>' . $message['text'] . '</span></td>';
+                $html .= '<td><span>' . $message['text'] . '</span></td>';
                 if ($message['removable']) {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
+                    $html .= '<td><div class="button ' . $type . '" onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/msg?ts=\' + (new Date()).getTime() + \'&action=remove&number=' . $number . '\' });">OK</div></td>';
                 }
                 else {
-                    $content = $content . '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
+                    $html .= '<td><div class="button ' . $type . '" onclick="alert(\'Nachricht kann nicht bestätigt werden.\');">OK</div></td>';
                 }
             }
-            $content .= '</tr>';
+            $html .= '</tr>';
         }
     }
-    $content .= '</table>';
-    $content .= '</div>';
-    SetValueString($mid, $content);
+    $html .= '</table>';
+    $html .= '</div>';
+    SetValueString($mid, $html);
 }
 
 // Nachrichten als HTML zusammenbauen.
@@ -740,11 +749,11 @@ function RenderNotifications($data)
     foreach ($data as $key => $value) {
         $click = str_replace('<PAGE>', $value['page'], $msg);
         $style = '';
-        if($key === array_key_last($data)) {
+        if ($key === array_key_last($data)) {
             $style = 'style="margin-right: 0px;"';
         }
         $cnt = 0;
-        foreach($value['count'] as $ident => $count) {
+        foreach ($value['count'] as $ident => $count) {
             $cnt += $count;
         }
         $html = $html . '<div class="trans button badge" data-badge="' . $cnt . '" ' . $click . $style . '><img class="ib" src="img/icons/' . $value['image'] . '.svg" /><span>' . $key . '</span></div>';
@@ -769,7 +778,7 @@ function Install()
     SetValueString($vid, json_encode([]));
     $vid = CreateVariableByName($_IPS['SELF'], 'Aktivitäten', 3, $pos++, '', '~HTMLBox');
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungen', 3, $pos++, '', '~HTMLBox');
-    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);;
+    $vid = CreateVariableByName($_IPS['SELF'], 'Meldungsnummer', 1, $pos++);
     SetValueInteger($vid, 0);
     $vid = CreateVariableByName($_IPS['SELF'], 'Meldungstyp', 1, $pos++, '', $vpn, $_IPS['SELF']);
     SetValueInteger($vid, -1);
@@ -783,6 +792,31 @@ function Install()
     RenderCard([]);
     RenderMessages([]);
     RenderNotifications([]);
+}
+
+function GetImage($res, $name, $title = '')
+{
+    if ($titel != '') {
+        $title = ' title="' . $title . '"';
+    }
+    switch ($res) {
+        case 2:
+            if ($name == 'Ok') {
+                $name = 'check';
+            } elseif ($name == 'Talk') {
+                $name = 'messages';
+            }
+            // v7.2 -
+            return '<i class="fa-light fa-' . strtolower($name) . '"' . $title . '></i>';
+            break;
+        case 1:
+            // v7.0 - v7.1
+            return '<img class="icon" src="/preview/assets/icons/' . $name . '.svg"' . $title . '></img>';
+            break;
+        default:
+            // v6.x
+            return '<img class="icon" src="/img/icons/' . $name . '.svg"' . $title . '></img>';
+    }
 }
 
 // Fehlerbehandlung
