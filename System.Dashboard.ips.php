@@ -796,9 +796,6 @@ function Install()
 
 function GetImage($res, $name, $title = '')
 {
-    if ($titel != '') {
-        $title = ' title="' . $title . '"';
-    }
     switch ($res) {
         case 2:
             if ($name == 'Ok') {
