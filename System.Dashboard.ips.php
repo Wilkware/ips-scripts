@@ -798,13 +798,12 @@ function GetImage($res, $name, $title = '')
 {
     switch ($res) {
         case 2:
-            if ($name == 'Ok') {
-                $name = 'check';
-            } elseif ($name == 'Talk') {
-                $name = 'messages';
-            }
+            $name = strtolower($name);
+            // strtr
+            $trans = ['ok' => 'check', 'talk' => 'messages', 'alarm' => 'bell', 'telephone' => 'phone', 'flame' => 'fire-flame', 'ips' => 'house'];
+            $name = strtr($name, $trans);
             // v7.2 -
-            return '<i class="fa-light fa-' . strtolower($name) . '"' . $title . '></i>';
+            return '<i class="fa-light fa-' . $name . '"' . $title . '></i>';
             break;
         case 1:
             // v7.0 - v7.1
