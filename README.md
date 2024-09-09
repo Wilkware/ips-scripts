@@ -25,6 +25,10 @@ Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von
 
 ### 3. Versionshistorie
 
+v2.3.20240909
+
+* _NEU_: Update Wetterscript (bessere Unterstützung für Fehler, TileVisu und openHASP)
+
 v2.2.20240801
 
 * _NEU_: Icondarstellung im Dashboard für v7.x überarbeitet
