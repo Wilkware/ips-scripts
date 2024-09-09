@@ -39,14 +39,14 @@ declare(strict_types=1);
 #              Unterstützung von Themes, Vorhersage und einiges mehr
 # 04.03.2024 - Kleine Anpassungen für Tile Visu (v3.2)
 # 12.08.2024 - Abruf auf CURL umgebaut (hoffentlich besseres Fehlerverhalten),
-#              weitere Fixes für TileVisu und 
+#              weitere Fixes für TileVisu und
 #              Unterstützung für openHASP Mini Display (v3.3)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
 # Global Debug Output Flag
 $DEBUG = false;
-#
+
 $USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
 #
 # Globale Variable __WWX als Array via define() in __autoload definiert!!!
