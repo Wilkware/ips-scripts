@@ -1,10 +1,10 @@
 # IP Symcon Skript Bibliothek
 
-[![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
-[![Product](https://img.shields.io/badge/Symcon%20Version-6.4-blue.svg)](https://www.symcon.de/produkt/)
-[![Version](https://img.shields.io/badge/Library%20Version-2.2.20240801-orange.svg)](https://github.com/Wilkware/ips-scripts)
-[![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Actions](https://github.com/Wilkware/ips-scripts/workflows/Check%20Style/badge.svg)](https://github.com/Wilkware/ips-scripts/actions)
+[![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg?style=flat-square)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
+[![Product](https://img.shields.io/badge/Symcon%20Version-6.4-blue.svg?style=flat-square)](https://www.symcon.de/produkt/)
+[![Version](https://img.shields.io/badge/Library%20Version-2.3.20240909-orange.svg?style=flat-square)](https://github.com/Wilkware/ips-scripts)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg?style=flat-square)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![Actions](https://img.shields.io/github/actions/workflow/status/wilkware/ips-scripts/style.yml?branch=main&label=CheckStyle&style=flat-square)](https://github.com/Wilkware/ips-scripts/actions)
 
 Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welche man für ein IP-Symcon System verwenden kann.
 
