@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   Amount.SolarForcast.ips.php
-# Version:  2.2.20230326
+# Version:  2.3.20240304
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Script zur Abholung und Aufbereitung der prognostizierten Solorproduktion

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Scriptbezeichnung: Weather.PirateWeather.ips.php
-# Version: 3.1.20231116
+# Version: 3.4.20241221
 # Author:  Heiko Wilknitz (@Pitti)
 #
 # Abruf von Wetterdaten via PirateWeather API!
@@ -41,6 +41,7 @@ declare(strict_types=1);
 # 12.08.2024 - Abruf auf CURL umgebaut (hoffentlich besseres Fehlerverhalten),
 #              weitere Fixes für TileVisu und
 #              Unterstützung für openHASP Mini Display (v3.3)
+# 21.12.2024   Umstellung auf WwxTileVisu, Kleiner Anpassung (v3.4)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
@@ -50,17 +51,17 @@ $DEBUG = false;
 $USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
 #
 # Globale Variable __WWX als Array via define() in __autoload definiert!!!
-$API = __WWX['PWN_TOKEN'];   // # API-Token (Key)
+$API = __WWX['PWN_TOKEN']; // # API-Token (Key)
 #
 # Location Control ID (wenn 0 => müssen $LAT & $LON korrekt gesetzt werden)
-$LCID = 0;
+$LCID = __WWX['IID_LC'];
 # Latitude/Längengrad
 $LAT = 52.5208;
 # Longitude/Breitengrad
 $LON = 13.4094;
 #
 # Ortsinfos setzen
-if ($LCID != 0) {
+if ($LCID >= __IPS_MIN_ID) {
     $location = json_decode(IPS_GetProperty($LCID, 'Location'), true);
     $LAT = $location['latitude'];
     $LON = $location['longitude'];
@@ -68,23 +69,22 @@ if ($LCID != 0) {
 #
 # Settings für HTML-Boxen;
 $HTML = [
-    'temp'      => 0,       // ID eigenen Temperaturvariable, z.B. von Wetterstation
-    'chance'    => 0,       // ID eigener Niederschlagswahrscheinlichkeit
-    'wind'      => 0,       // ID eigener Windgeschwindigkeit
-    'direction' => 0,       // ID eigener Windrichtung
-    'humidity'  => 0,       // ID eigener Luftfeutigkeit (Aussen)
-    'rain'      => 0,       // ID eigener Niederschlag/Tag
+    'temp'      => 44569,   // ID eigenen Temperaturvariable, z.B. von Wetterstation
+    'chance'    => 39027,   // ID eigener Niederschlagswahrscheinlichkeit
+    'wind'      => 46226,   // ID eigener Windgeschwindigkeit
+    'direction' => 37150,   // ID eigener Windrichtung
+    'humidity'  => 50653,   // ID eigener Luftfeutigkeit (Aussen)
+    'rain'      => 27144,   // ID eigener Niederschlag/Tag
     'sunrise'   => date_sunrise(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),  // Uhrzeit 'hh:mm' für Sonnenaufgang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'sunset'    => date_sunset(time(), SUNFUNCS_RET_STRING, $LAT, $LON, 90, 1),   // Uhrzeit 'hh:mm' für Sonnenuntergang, oder via GetValue() vom Location Modul Variable => date('H:i', Getvalue(12345));
     'webfront'  => true,    // true = Support für WebFront ('3-Tage-Wetter' & '24-Stunden--Wetter'), IPS <= v6.4
     'tilevisu'  => true,    // true = Support für Tile Visu ('Aktuelles-Wetter'). IPS >= v7.0
-    'icon01'    => false,   // true = Nutzung eigener Icons für aktuelle Wetterlage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
-    'icon03'    => false,   // true = Nutzung eigener Icons für 3 Tage Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'icon01'    => true,   // true = Nutzung eigener Icons für aktuelle Wetterlage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
+    'icon03'    => true,   // true = Nutzung eigener Icons für 3 Tage Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'icon07'    => false,   // true = Nutzung eigener Icons für 7 Tage Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'icon24'    => false,   // true = Nutzung eigener Icons für 24 Stunden Vorhersage (siehe Array $ICONS) oder nachfolgende URL hinterlegen
     'ibase'     => 'https://basmilius.github.io/weather-icons/production/line/all/', // URL Base für Online-Icons (.../fill/all/ or .../line/all/)
     'iext'      => '.svg',  // Image Type Extension (.png, .svg, .jpg, ...)
-    'theme'     => 'hell', // 'hell' oder 'dunkel'
 ];
 #
 # Globale Übersetzungstabelle
@@ -117,6 +117,7 @@ $TRANS = [
     'Partly Cloudy' => 'Teilweise bewölkt',
     'Rain'          => 'Regen',
     'Snow'          => 'Schnee',
+    'Windy'         => 'Windig',
 ];
 #
 # Icon Mapping Array - freies Mapping auf eigene lokale Icons
@@ -300,7 +301,7 @@ function SetDailyWeather($days)
     $txt = GetValue($vid);
     // Temperatur
     $vid = CreateVariableByName($_IPS['SELF'], 'Temperatur', 2);
-    if ($HTML['temp'] != 0) {
+    if ($HTML['temp'] >= __IPS_MIN_ID) {
         $vid = $HTML['temp'];
     }
     $tmp = GetValue($vid);
@@ -311,7 +312,7 @@ function SetDailyWeather($days)
     // Niederschlagswahrscheinlichkeit (<i class="fa-light fa-umbrella"></i>&nbsp;)
     $fall = '<span class="txt fall">{{fall}} Regen</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlagswahrscheinlichkeit', 2);
-    if ($HTML['chance'] != 0) {
+    if ($HTML['chance'] >= __IPS_MIN_ID) {
         $vid = $HTML['chance'];
     }
     $value = GetValueFormatted($vid);
@@ -319,12 +320,12 @@ function SetDailyWeather($days)
     // Wind (<i class="fa-light fa-wind"></i>&nbsp;)
     $wind = '<span class="txt wind">{{wind}}</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Windgeschwindigkeit', 2);
-    if ($HTML['wind'] != 0) {
+    if ($HTML['wind'] >= __IPS_MIN_ID) {
         $vid = $HTML['wind'];
     }
     $value = GetValueFormatted($vid);
     $vid = CreateVariableByName($_IPS['SELF'], 'Windrichtung', 2);
-    if ($HTML['direction'] != 0) {
+    if ($HTML['direction'] >= __IPS_MIN_ID) {
         $vid = $HTML['direction'];
     }
     $value = $value . ' ' . GetValueFormatted($vid);
@@ -332,7 +333,7 @@ function SetDailyWeather($days)
     // Luftfeuchtigkeit (<i class="fa-light fa-raindrops"></i>&nbsp;)
     $humi = '<span class="txt humi">{{humi}} Luftfeuchte</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Luftfeuchtigkeit', 2);
-    if ($HTML['humidity'] != 0) {
+    if ($HTML['humidity'] >= __IPS_MIN_ID) {
         $vid = $HTML['humidity'];
     }
     $value = GetValueFormatted($vid);
@@ -340,14 +341,14 @@ function SetDailyWeather($days)
     // Niederschlag/h (<i class="fa-light fa-raindrops"></i>&nbsp;)
     $rain = '<span class="txt rain">{{rain}}/Tag</span>';
     $vid = CreateVariableByName($_IPS['SELF'], 'Niederschlag/h', 2);
-    if ($HTML['rain'] != 0) {
+    if ($HTML['rain'] >= __IPS_MIN_ID) {
         $vid = $HTML['rain'];
     }
     $value = GetValueFormatted($vid);
     $rain = str_replace('{{rain}}', $value, $rain);
     // HTML WebFront
     if ($HTML['webfront']) {
-        $htmlWF = '';
+        $htmlWF = __TILE_VISU_SCRIPT;
         $htmlWF .= '<style type="text/css">';
         $htmlWF .= '.wdiv { height:220px; display:flex;}';
         $htmlWF .= '.wbox { display:inline-block; position:relative; border:1px solid rgba(255, 255, 255, 0.1); height:220px; margin: 0px 10px 0px 0px; color: rgb(255, 255, 255); background-image: linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -o-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -webkit-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%); background-image: -ms-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.3) 100%);}';
@@ -399,15 +400,8 @@ function SetDailyWeather($days)
     }
     // HTML Tile Visu
     if ($HTML['tilevisu']) {
-        $bgc = ($HTML['theme'] == 'hell') ? '#00CDAB' : '#24625B';
-        $iif = ($HTML['theme'] == 'hell') ? ' filter: invert(0.6);' : '';
-        $htmlTV = '<meta name="viewport" content="width=device-width, initial-scale=1">';
+        $htmlTV = __TILE_VISU_SCRIPT;
         $htmlTV .= '<style type="text/css">';
-        $htmlTV .= 'body {margin:0px;}';
-        $htmlTV .= '::-webkit-scrollbar{width:8px;}';
-        $htmlTV .= '::-webkit-scrollbar-track{background:transparent;}';
-        $htmlTV .= '::-webkit-scrollbar-thumb{background:transparent; border-radius:20px;}';
-        $htmlTV .= '::-webkit-scrollbar-thumb:hover{background:#555;}';
         $htmlTV .= '.cardS {display:block;}';
         $htmlTV .= '.cardM {display:none;}';
         $htmlTV .= '.cardL {display:none;}';
@@ -418,10 +412,10 @@ function SetDailyWeather($days)
         $htmlTV .= '.wico {width:100%; height:80vw; position:absolute; bottom:0px; background-image:url(' . $url . '); background-size:contain; background-repeat:no-repeat; background-position-x:center; background-position-y:bottom;}';
         $htmlTV .= '.wsgl {position:absolute; bottom:0px; left:0px; font-size:6vw; opacity: 75%;}';
         $htmlTV .= '.wssr {position:absolute; bottom:0px; right:0px; font-size:6vw; opacity: 75%;}';
-        $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px ' . $bgc . '; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
+        $htmlTV .= '.wfgd {position: absolute; bottom: 0; width: 100%; padding-top: 5px; display: grid; border-top: solid 2px #11A0F3; grid-template-rows: auto; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; margin: 0 auto; justify-content: center; text-align: center;}';
         $htmlTV .= '.wfgd > .day {font-size: 6vh;}';
         $htmlTV .= '.wfgd > .img {width: 48px; height: 48px; margin: auto; display: block; }';
-        $htmlTV .= '.wfgd > .txt {color: white; background: ' . $bgc . '; border-radius:5px; margin: 0 4px; font-size: small;}';
+        $htmlTV .= '.wfgd > .txt {color: white; background: #11A0F3; border-radius: 5px; margin: 0 4px; padding: 3px 0 0 0; font-size: small;}';
         $htmlTV .= '.wifo {position: absolute; top: 0; right: 0; display: grid; grid-template-rows: 1fr 1fr 1fr 1fr ; grid-template-columns: auto; margin: 0 auto; justify-content: center;}';
         $htmlTV .= '.wifo > .txt {font-size: 6vh; opacity: 75%;}';
         $htmlTV .= '.hidden {display:none;}';
@@ -441,8 +435,8 @@ function SetDailyWeather($days)
         $htmlTV .= '  .cardL {display:none;}';
         $htmlTV .= '}';
         $htmlTV .= '</style>';
-        //$htmlTV .= '<script src="./icons.js" crossorigin="anonymous"></script>';
         // Aktueller Daten
+        $htmlTV .= '<body>';
         $htmlTV .= '<!-- Small Cards -->';
         $htmlTV .= '<div class="cardS">';
         $htmlTV .= '    <div class="wbox">';
@@ -491,6 +485,7 @@ function SetDailyWeather($days)
         $htmlTV .= '<!-- Large Cards -->';
         $htmlTV .= '<div class="cardL">';
         $htmlTV .= '</div>';
+        $htmlTV .= '</body>';
         // Day speichern
         $vid = CreateVariableByName($_IPS['SELF'], 'Aktuelles-Wetter', 3);
         SetValue($vid, $htmlTV);

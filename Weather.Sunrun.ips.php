@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:  Weather.Sunrun.ips.php
-# Version: 2.4.20230223
+# Version: 2.6.20241221
 # Author:  Heiko Wilknitz (@Pitti)
 #
 # Berechung des aktuellen Sonnenstandes und stellt ihn graphisch dar.
@@ -34,6 +34,7 @@ declare(strict_types=1);
 # 06.02.2023 - Option für Sonnenuntergang hinzugefügt (v2.3)
 # 23.02.2023 - Location-Angaben werden jetzt als float angegeben (v2.4)
 # 04.03.2024 - Kleine Anpassungen für Tile Visu (v2.5)
+# 21.12.2024 - LocationControlID ausgelagert, Meta-Tag liefert jetzt IPS (v2.6)
 #
 # ------------------------------ Konfiguration ---------------------------------
 #
@@ -41,7 +42,7 @@ declare(strict_types=1);
 $DEBUG = false;
 #
 # Location Control ID (wenn 0 => müssen $LAT & $LON korrekt gesetzt werden)
-$LCID = 0;
+$LCID = __WWX['IID_LC'];
 # Latitude
 $LAT = 52.5208;
 # Longitude
@@ -90,7 +91,7 @@ if ($_IPS['SENDER'] == 'TimerEvent') {
     // Set Postion Infos
     $latitude = $LAT;
     $longitude = $LON;
-    if ($LCID != 0) {
+    if ($LCID >= __IPS_MIN_ID) {
         $location = json_decode(IPS_GetProperty($LCID, 'Location'), true);
         $latitude = $location['latitude'];
         $longitude = $location['longitude'];
@@ -220,7 +221,7 @@ function BuildHtml($pos, $draw)
     $html .= '<!DOCTYPE html>';
     $html .= '<html lang="de">';
     $html .= '<head>';
-    $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
+    //$html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
     $html .= '<style>';
     $html .= 'body { margin: 0; overflow: hidden; }';
     $html .= '#sunmap {background: url("' . $draw['bg'] . '") no-repeat; background-size: cover; width: ' . $draw['size'] . 'px; height: ' . $draw['size'] . 'px; margin: auto;}';

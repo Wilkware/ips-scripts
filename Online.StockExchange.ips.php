@@ -30,7 +30,7 @@ declare(strict_types=1);
 # Wertpapierkennnummer
 $wkn = [
     // Tageschau Börsenkurse
-    "dax-index-846900"	=> "DAX",
+    'dax-index-846900'	=> 'DAX',
 ];
 #
 # Aktuell mögliche Werte:
@@ -38,7 +38,7 @@ $wkn = [
 #   52 Wochen-Hoch, 52 Wochen-Tief,
 #   Allzeit-Hoch, Allzeit-Tief,
 #   Schluss Vortag, Geld, Brief
-$wkn_values = ['Eröffnung', 'Tages-Hoch', 'Tages-Tief'];
+$wkn_values = ['Schluss Vortag', 'Eröffnung', 'Tages-Hoch', 'Tages-Tief'];
 #
 ################################################################################
 #
@@ -52,7 +52,6 @@ defined('WWX_FUNCTIONS') || die('Global function library not available!');
 // INSTALLATION
 if ($_IPS['SENDER'] == 'Execute') {
     // ID des ArchiveHandler ermitteln
-    $aid = 
     $aid = IPS_GetInstanceListByModuleID(ExtractGuid('Archive Control'))[0];
     // pro WKN eine Variable
     foreach ($wkn as $ident => $name) {
@@ -61,7 +60,7 @@ if ($_IPS['SENDER'] == 'Execute') {
         IPS_SetInfo($vid, $ident);
         AC_SetLoggingStatus($aid, $vid, true);
         // Unterhalb Variablen für die Tageswerte anlegen
-        foreach($wkn_values as $name) {
+        foreach ($wkn_values as $name) {
             CreateVariableByName($vid, $name, 2, $pos++, 'chart-mixed-up-circle-dollar', '~Euro');
         }
         CreateVariableByName($vid, 'Tagesveränderung', 3, $pos, 'chart-mixed-up-circle-dollar');

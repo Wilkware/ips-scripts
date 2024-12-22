@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ################################################################################
 # Script:   System.Functions.ips.php
-# Version:  4.0.20231005
+# Version:  4.1.20240304
 # Author:   Heiko Wilknitz (@Pitti)
 #
 # Basisfunktionen für einfache Scripterstellung!

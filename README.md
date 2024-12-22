@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/Symcon-Scripts-red.svg?style=flat-square)](https://www.symcon.de/de/service/dokumentation/komponenten/dienst/php/)
 [![Product](https://img.shields.io/badge/Symcon%20Version-6.4-blue.svg?style=flat-square)](https://www.symcon.de/produkt/)
-[![Version](https://img.shields.io/badge/Library%20Version-2.3.20240909-orange.svg?style=flat-square)](https://github.com/Wilkware/ips-scripts)
+[![Version](https://img.shields.io/badge/Library%20Version-2.4.20241222-orange.svg?style=flat-square)](https://github.com/Wilkware/ips-scripts)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg?style=flat-square)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Actions](https://img.shields.io/github/actions/workflow/status/wilkware/ips-scripts/style.yml?branch=main&label=CheckStyle&style=flat-square)](https://github.com/Wilkware/ips-scripts/actions)
 
@@ -24,6 +24,13 @@ Dies ist eine Sammlung von allgemeinen oder aufgabenspezifischen Skripten, welch
 Der Hintergrund und die Verwendung ist in meinem Blogartikel '[Versionierung von Skripte](https://wilkware.de/2022/03/versionierung-skripte/)' näher beschrieben.
 
 ### 3. Versionshistorie
+
+v2.4.20241222
+
+* _NEU_: Börsenticker Script 
+* _NEU_: Update Local Script um neue TileVisu Farben und Icon-Mapping
+* _NEU_: Update SolarEdge Script wegen Auswahl des (Auswertungs-)Zeitraums
+* _FIX_: Versionsnummern in allen Scripts korrekt nachgezogen
 
 v2.3.20240909
 

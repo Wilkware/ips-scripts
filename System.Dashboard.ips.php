@@ -8,7 +8,7 @@ header('Access-Control-Allow-Headers: X-Requested-With');
 
 ################################################################################
 # Script:   System.Dashboard.ips.php
-# Version:  5.2.20231116
+# Version:  5.4.20241209
 # Author:   Heiko Wilknitz (@Pitti)
 #           Original von Horst (12.11.2010)
 #           Angepasst für RasPi lueralba (31.3.2015)
@@ -112,11 +112,12 @@ header('Access-Control-Allow-Headers: X-Requested-With');
 # 16.11.2023 - Fix für Icons mit hellem Themes (v5.2)
 #              Icons für TileVisu werden auch aus dessen Assets geladen
 # 01.08.2024 - Fix für neue awesome Icons (v5.3)
+# 09.12.2024 - Fix für Icon-Mapping und WwxTileVisu (v5.4)
 #
 # ----------------------------- Konfigruration ---------------------------------
 #
 # WebFront Configuration (ID)
-$wfc = 0;
+$wfc = __WWX['VID_WF'];
 # First In First Out - erste Meldung wird zuerst dargestellt, sonst
 # letzte Meldung zuerst (LIFO).
 $fifo = false;
@@ -130,7 +131,7 @@ $bfort = false;
 # Flag, ob Button für Switch Page angezeigt werden soll;
 # nur in Kombi mit $bfort = false
 $bpage = true;
-# Flag, für hellen oder dunklem Theme in der TileVisu
+# Flag, für hellen oder dunklem Theme in der TileVisu (IPS v7.0 - v7.1)
 $light = false;
 # Flag, welche Icon Ressourcen für IPS v7.x genutzt werden sollen
 #   0 = altes WF (IPS v6.x)
@@ -587,19 +588,10 @@ function RenderCard($data)
     $cnt = count($data);
     $iif = ($light) ? ' filter: invert(0.6); ' : ' ';
     // HTML zusammenbauen
-    $html = '';
+    $html = __TILE_VISU_SCRIPT;
     // Stylesheets
-    $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
     $html .= '<style type="text/css">';
-    $html .= 'body {margin: 0px;}';
-    $html .= '::-webkit-scrollbar { width: 8px; }';
-    $html .= '::-webkit-scrollbar-track { background: transparent; }';
-    $html .= '::-webkit-scrollbar-thumb { background: transparent; border-radius: 20px; }';
-    $html .= '::-webkit-scrollbar-thumb:hover { background: #555; }';
     $html .= '.card { display:block; }';
-    $html .= 'table.wwx { border-collapse: collapse; width: 100%; font-size:14px; }';
-    $html .= '.wwx th, .wwx td { vertical-align: middle; text-align: left; padding: 4px; }';
-    $html .= '.wwx tr { border-bottom: 1px solid color-mix(in srgb, currentcolor 25%, transparent); }';
     $html .= '.wwx tr:nth-of-type(1) { border-top: 1px solid color-mix(in srgb, currentcolor 25%, transparent); }';
     $html .= '.icon {width: 24px; height: 24px;' . $iif . '}';
     $html .= 'span { font-size: 12px; }';
@@ -615,6 +607,7 @@ function RenderCard($data)
         $html .= '<script src="./icons.js"></script>';
     }
     // Start Content
+    $html .= '<body>';
     $html .= '<div class="card">';
     $html .= '<table class="wwx">';
     $html .= '<colgroup>';
@@ -715,6 +708,7 @@ function RenderCard($data)
     }
     $html .= '</table>';
     $html .= '</div>';
+    $html .= '</body>';
     SetValueString($mid, $html);
 }
 
@@ -798,11 +792,10 @@ function GetImage($res, $name, $title = '')
 {
     switch ($res) {
         case 2:
-            $name = strtolower($name);
-            // strtr
-            $trans = ['ok' => 'check', 'talk' => 'messages', 'alarm' => 'bell', 'telephone' => 'phone', 'flame' => 'fire-flame', 'ips' => 'house'];
-            $name = strtr($name, $trans);
             // v7.2 -
+            if(isset(__ICONS[$name])) {
+                $name = __ICONS[$name];
+            }
             return '<i class="fa-light fa-' . $name . '"' . $title . '></i>';
             break;
         case 1:
