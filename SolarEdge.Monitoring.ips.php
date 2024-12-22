@@ -26,10 +26,10 @@ declare(strict_types=1);
 # Global Debug Output Flag
 $DEBUG = false;
 #
+# SolarEdge Settings
 $API_KEY = __WWX['SEM_TOKEN'];
 $API_SITE = __WWX['SEM_SID'];
 $API_BASE = 'https://monitoringapi.solaredge.com';
-#
 $API_UNIT = [
     [0, 'Tag',   '', -1, 'DAY'],
     [1, 'Woche', '', -1, 'WEEK'],
@@ -106,7 +106,7 @@ elseif ($_IPS['SENDER'] == 'TimerEvent') {
 }
 // WEBHOOK
 elseif ($_IPS['SENDER'] == 'WebHook') {
-    $period = isset($_GET['p'])?$_GET['p']: 3;
+    $period = isset($_GET['p']) ? $_GET['p'] : 3;
     $cid = GetDummyByIdent($_IPS['SELF'], 'SiteEnergy');
     $vid = CreateVariableByIdent($cid, 'Period', 'Zeitraum', 1);
     SetValue($vid, $period);
@@ -214,7 +214,7 @@ function UpdateSiteEnergy($api_base, $api_key, $site_id, $time_unit, $timer)
     foreach ($data['energyDetails']['meters'] as $meter) {
         $value = $meter['values'][0]['value'] / 1000.;
         $performance[$meter['type']] = $value;
-        if($timer) {
+        if ($timer) {
             $vid = GetObjectByIdent($cid, $meter['type']);
             SetValue($vid, $value);
         }
@@ -290,10 +290,10 @@ function RenderHtml($data, $time, $period)
     <div class="sem-text-right">Zukauf: <font style="color: #FF0000; font-weight: bold;">' . $purchaesd_kwh . '&nbsp;kWh&nbsp;</font></div>
 </div>
 <div class="sem-box-button">
-    <button class="sem-button sem-button-left' . ($period==0?' sem-button-select" ':'" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=0\' });">Tag</button>
-    <button class="sem-button' . ($period==1?' sem-button-select" ':'" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=1\' });">Woche</button>
-    <button class="sem-button' . ($period==2?' sem-button-select" ':'" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=2\' });">Monat</button>
-    <button class="sem-button sem-button-right' . ($period==3?' sem-button-select" ':'" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=3\' });">Jahr</button>
+    <button class="sem-button sem-button-left' . ($period == 0 ? ' sem-button-select" ' : '" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=0\' });">Tag</button>
+    <button class="sem-button' . ($period == 1 ? ' sem-button-select" ' : '" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=1\' });">Woche</button>
+    <button class="sem-button' . ($period == 2 ? ' sem-button-select" ' : '" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=2\' });">Monat</button>
+    <button class="sem-button sem-button-right' . ($period == 3 ? ' sem-button-select" ' : '" ') . 'onclick="window.xhrGet=function xhrGet(o) {var xhr = new XMLHttpRequest();xhr.open(\'GET\',o.url,true); xhr.send();};window.xhrGet({ url: \'/hook/sem?p=3\' });">Jahr</button>
 </div>
 </body>';
 

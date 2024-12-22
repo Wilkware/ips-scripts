@@ -793,7 +793,7 @@ function GetImage($res, $name, $title = '')
     switch ($res) {
         case 2:
             // v7.2 -
-            if(isset(__ICONS[$name])) {
+            if (isset(__ICONS[$name])) {
                 $name = __ICONS[$name];
             }
             return '<i class="fa-light fa-' . $name . '"' . $title . '></i>';

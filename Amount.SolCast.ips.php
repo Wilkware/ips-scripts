@@ -182,23 +182,23 @@ function ForecastData($data)
 {
     $fd = [];
     if (isset($data['forecasts'])) {
-      foreach ($data['forecasts'] as $o) {
-          $hour = date('H', strtotime($o['period_end']));
-          $day = date('z', strtotime($o['period_end'])) - date('z');
-          if (isset($fd[$day][$hour])) {
-              // echo "Add " . $day . ' - ' . $hour . PHP_EOL;
-              $fd[$day][$hour]['norm'] = ($fd[$day][$hour]['norm'] + $o['pv_estimate']) / 2;
-              $fd[$day][$hour]['poor'] = ($fd[$day][$hour]['poor'] + $o['pv_estimate10']) / 2;
-              $fd[$day][$hour]['more'] = ($fd[$day][$hour]['more'] + $o['pv_estimate90']) / 2;
-          } else {
-              // echo "New " . $day . ' - ' . $hour . PHP_EOL;
-              $fd[$day][$hour] = [
-                  'norm'  => $o['pv_estimate'],
-                  'poor'  => $o['pv_estimate10'],
-                  'more'  => $o['pv_estimate90'],
-              ];
-          }
-      }
+        foreach ($data['forecasts'] as $o) {
+            $hour = date('H', strtotime($o['period_end']));
+            $day = date('z', strtotime($o['period_end'])) - date('z');
+            if (isset($fd[$day][$hour])) {
+                // echo "Add " . $day . ' - ' . $hour . PHP_EOL;
+                $fd[$day][$hour]['norm'] = ($fd[$day][$hour]['norm'] + $o['pv_estimate']) / 2;
+                $fd[$day][$hour]['poor'] = ($fd[$day][$hour]['poor'] + $o['pv_estimate10']) / 2;
+                $fd[$day][$hour]['more'] = ($fd[$day][$hour]['more'] + $o['pv_estimate90']) / 2;
+            } else {
+                // echo "New " . $day . ' - ' . $hour . PHP_EOL;
+                $fd[$day][$hour] = [
+                    'norm'  => $o['pv_estimate'],
+                    'poor'  => $o['pv_estimate10'],
+                    'more'  => $o['pv_estimate90'],
+                ];
+            }
+        }
     }
     return $fd;
 }
