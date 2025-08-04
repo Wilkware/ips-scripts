@@ -283,7 +283,7 @@ function GetRowInfos($data, $away, $rows)
             $pos++;
             // genug Zeilen?
             if ($pos >= $rows)
-            break;
+                break;
         }
     }
     return $lines;
